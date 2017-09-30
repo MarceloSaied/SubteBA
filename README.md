@@ -29,3 +29,22 @@ alt="SubteBA Logo" height="100" width="200">
 #### Application Workflow
 ![Workflow1 image](https://github.com/MarceloSaied/SubteBA/blob/master/images/workflow1.jpg)
 
+- - - 
+- - -
+### Datos para el desarrollo
+
+* nlos secrets se guardan en un folder  "secret"
+* los mensages se mandan a Telegram usando este usa un archivo de configuracion en el folder secret ( en un futuro sera copiado a temp folder en runtime)
+
+El archivo de configuracion es el siguiente
+
+Config.ini
+
+```ini
+[bot]
+name=@SubteBA_bot
+token=bot4010332xxxxxxxx
+[dev]
+chatID=2x51xxxxx
+
+```
