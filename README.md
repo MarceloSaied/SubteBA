@@ -1,19 +1,34 @@
 #                      SubteBA
 ##               SubteBA alerts for Telegram
-![alt text](https://github.com/MarceloSaied/SubteBA/blob/master/images/SubteBA_icon.jpg)
-###          Telegram Bot       @SubteBA_bot
+
+###          Telegram Bot    = = = =    @SubteBA_bot
+<table border="0">
+<tr><td>
 Este BOT , lee los informes de Subte BA Buenos Aires Ciudad en Twitter, y los envia por este canal.
 Este canal **no es official** del subte ni de Metrovias.
 Es simplemente un testeo de la tecnologia.
+</td> <td> <img src="https://github.com/MarceloSaied/SubteBA/blob/master/images/SubteBA_icon.jpg" alt="SubteBA Logo" height="42" width="42"> 
+</td></tr>
 
-<dl>
-  <dt>Etapas de desarrollo</dt>
-  <dd>* Configuracion del Bot en Telegram</dd>
-  <dd>* Envio de mensajes a clientes telegram</dd>
+</table>
 
-  <dt>Markdown in HTML</dt>
-  <dd></dd>
-</dl>
+![SubteBA Logo](https://github.com/MarceloSaied/SubteBA/blob/master/images/SubteBA_icon.jpg)
 
 
-![alt text](https://github.com/MarceloSaied/SubteBA/blob/master/images/workflow1.jpg)
+
+- - -
+#### Etapas de desarrollo
+| Task                                  | Status     | Version| Date      |     |
+| ------------------------------------- |:----------:| :-----:| :--------:|----:|
+| Configuracion del Bot en Telegram     | In Process | 0.1    |  08/2017  |     | 
+| Envio de mensajes a clientes telegram | Done       | 0.1    |  08/2017  |     |
+|                                       |            | 0.x    |  xx/2017  |     |
+|                                       |            | 0.x    |  xx/2017  |     |
+|                                       |            | 0.x    |  xx/2017  |     |
+|                                       |            | 0.x    |  xx/2017  |     |
+
+
+- - -
+#### Application Workflow
+![Workflow1 image](https://github.com/MarceloSaied/SubteBA/blob/master/images/workflow1.jpg)
+
