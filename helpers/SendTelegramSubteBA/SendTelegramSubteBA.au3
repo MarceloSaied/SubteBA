@@ -39,10 +39,10 @@
 $chatID=""
 #EndRegion
 #Region  ------------ Modules
-   #include <File.au3>
-   #include <Constants.au3>
-   #include <Date.au3>
-   #include <Array.au3>
+	#include <File.au3>
+	#include <Constants.au3>
+	#include <Date.au3>
+	#include <Array.au3>
 	#include <date.au3>
 	#include <IE.au3>
 	#include <Array.au3>
@@ -108,7 +108,6 @@ EndFunc
 
 Func SendTelegramexec($msgtext="testeo harcoded")
 	local $token=IniRead("..\..\secret\config.ini","bot","token","")
-;~ 	local $token="bot401033255:AAGp6iC1iAOSVXIjCAZ3hFuSrtnpJo6Z8BM"   ;  @SubteBA_bot
 	$urlMSG="https://api.telegram.org/" & $token & "/sendMessage?chat_id=" & $chatid & "&text=" & $msgtext
 	$sGet = HttpGet($urlMSG)
 
