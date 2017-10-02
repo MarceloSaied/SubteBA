@@ -53,3 +53,9 @@ token=bot4010332xxxxxxxx
 chatID=2x51xxxxx
 
 ```
+
+**Reporte de ideas  y Bugs** en https://github.com/MarceloSaied/SubteBA/issues
+
+### Desarrollo y aportes
+
+* Marcelo Saied
