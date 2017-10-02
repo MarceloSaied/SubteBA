@@ -54,7 +54,12 @@ chatID=2x51xxxxx
 
 ```
 
+- - -
+
+- - -
+
 **Reporte de ideas  y Bugs** en https://github.com/MarceloSaied/SubteBA/issues
+#### Slack [invite](https://join.slack.com/t/subteba/shared_invite/enQtMjQ5ODYxMjkwNzU3LWRjMDM0MmUzOTZhNWQ5N2Q4ZWM5NmM3OGM2ZmQxYzgxODdjMTk4NWZjYmNkYTEwMTEzYWI1ZTk5YTIxZTk2OGU)
 
 ### Desarrollo y aportes
 
