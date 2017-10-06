@@ -2,6 +2,10 @@
 ##               SubteBA alerts for Telegram
 
 ###          Telegram Bot    = = = =    @SubteBA_bot
+
+[Subscribirse al SubteBA Bot ](https://t.me/subteba)
+
+
 <table border="0">
 <tr><td>
 Este BOT , lee los informes de Subte BA Buenos Aires Ciudad en Twitter, y los envia por este canal.
@@ -37,22 +41,44 @@ alt="SubteBA Logo" height="100" width="200">
 - - -
 ### Datos para el desarrollo
 
-* nlos secrets se guardan en un folder  "secret"
-* los mensages se mandan a Telegram usando este usa un archivo de configuracion en el folder secret ( en un futuro sera copiado a temp folder en runtime)
+* Secrets
+	* Los secrets se guardan en un folder  "secret"
+	* El folder RENsecret tiene los archivos de del folder secret , pero ofuscados
+	* Archivos en SECRET folder
+	
+	| Nombre de archivo       | Descripcion     | 
+	| ----------------------- |----------|
+	| Config.ini | archivo de configuracion      | 
+	| Recipients.txt | archivo temporario para desarrollo con usuarios registrados en el Bot | 
+	|      |  | 
 
-El archivo de configuracion es el siguiente
 
-Config.ini
+* Archivo de configuracion
+	* los mensages se mandan a Telegram usando este usa un archivo de configuracion en el folder secret ( en un futuro sera copiado a temp folder en runtime)
 
-```ini
-[bot]
-name=@SubteBA_bot
-token=bot4010332xxxxxxxx
-[dev]
-chatID=2x51xxxxx
+	El archivo de configuracion es el siguiente
+	Config.ini
 
-```
+	```ini
+	[bot]
+	name=@SubteBA_bot
+	token=bot4010332xxxxxxxx
+	[dev]
+	chatID=2x51xxxxx
+	```
 
+* Archivo de usuarios
+
+	El archivo con los usuarios registrados en el Bot (solo para desarrollo) es el siguiente
+	Recipients.txt
+	Consta de dos datos por registro
+	UserID y Nombre del usuario
+	```csv
+	20xx0xxxx,Marcelo Saied
+	20xx0xxxx,Guillermo Blanco
+
+
+	```
 - - -
 
 - - -
