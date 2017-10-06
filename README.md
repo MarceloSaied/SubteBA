@@ -18,17 +18,16 @@ alt="SubteBA Logo" height="100" width="200">
 | Task                                  | Status     | Version| Date      |     |
 | ------------------------------------- |:----------:| :-----:| :--------:|----:|
 | Configuracion del Bot en Telegram     | Done       | 0.1    |  08/2017  |     | 
-| Envio de mensajes a clientes telegram | Done       | 0.1    |  08/2017  |     |
-| get data from telegram bot            | In Process | 0.1    |  xx/2017  |     |
-| store user id from data bot           | In Process | 0.1    |  xx/2017  |     |
-| scrap twiter subteba for messages     |            | 0.x    |  xx/2017  |     |
-| store scrapped messages               |            | 0.x    |  xx/2017  |     |
-| send messages to users                |            | 0.x    |  xx/2017  |     |
+| Envio de mensajes a clientes telegram | Done       | 0.1    |  09/2017  |     |
+| scrap twiter subteba for messages     | Done       | 0.1    |  10/2017  |     |
+| send messages to users                | Done       | 0.1    |  10/2017  |     |
+| store scrapped messages at database   | In Process | 0.1    |  10/2017  |     |
+| send New messages to users            |            | 0.x    |  xx/2017  |     |
+| get data from telegram bot            |            | 0.x    |  xx/2017  |     |
+| store user id from data bot           |            | 0.x    |  xx/2017  |     |
 |                                       |            | 0.x    |  xx/2017  |     |
 |                                       |            | 0.x    |  xx/2017  |     |
 |                                       |            | 0.x    |  xx/2017  |     |
-|                                       |            | 0.x    |  xx/2017  |     |
-
 
 - - -
 #### Application Workflow
