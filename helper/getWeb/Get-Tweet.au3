@@ -4,8 +4,12 @@
 FileInstall("../SendTelegramSubteBA/SendTelegramSubteBA.exe", @TempDir & "\SendTelegramSubteBA.exe" , 1 )
 Local $sData = InetRead("https://twitter.com/subteba")
 Local $nBytesRead = @extended
+ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $nBytesRead = ' & $nBytesRead & @crlf )
 $htmltxt=BinaryToString($sData)
-
+if $nBytesRead<100 then
+;~   ConsoleWrite('@@ EXITCODE 10 : $nBytesRead = ' & $nBytesRead & @crlf )
+  exit 5
+endif
 $TweetMSGArr = StringRegExp($htmltxt,'(?s)(?i)<div class="js-tweet-text-container">(.*?)</DIV>',3)
 $TweetIDArr = StringRegExp($htmltxt,'(?s)(?i)data-tweet-id="(.*?)"',3)
 ;~ data-tweet-id="915890851867275265"
@@ -19,7 +23,7 @@ if IsArray($TweetArr) then
   For $i = $u To 1 Step -1
 	 $TweetMessage = StringRegExp($TweetArr[$i][1],'(?s)(?i)<p(.*?)>(.*?)</p>',1)
 	 $mensaje=clearstring($TweetMessage[1])
-;~ 	 _sendmessages($mensaje)
+	 _sendmessages($mensaje)
   Next
   exit 10
 Else
