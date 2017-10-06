@@ -4,14 +4,24 @@
 FileInstall("../SendTelegramSubteBA/SendTelegramSubteBA.exe", @TempDir & "\SendTelegramSubteBA.exe" , 1 )
 Local $sData = InetRead("https://twitter.com/subteba")
 Local $nBytesRead = @extended
+ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $nBytesRead = ' & $nBytesRead & @crlf )
 $htmltxt=BinaryToString($sData)
+if $nBytesRead<100 then
+;~   ConsoleWrite('@@ EXITCODE 10 : $nBytesRead = ' & $nBytesRead & @crlf )
+  exit 5
+endif
+$TweetMSGArr = StringRegExp($htmltxt,'(?s)(?i)<div class="js-tweet-text-container">(.*?)</DIV>',3)
+$TweetIDArr = StringRegExp($htmltxt,'(?s)(?i)data-tweet-id="(.*?)"',3)
+;~ data-tweet-id="915890851867275265"
 
-$TweetArr=""
-$TweetArr = StringRegExp($htmltxt,'(?s)(?i)<div class="js-tweet-text-container">(.*?)</DIV>',3)
+$TweetArr=_mergeArray($TweetIDArr,$TweetMSGArr)
+;~ _ArrayDisplay($TweetArr)
+
+
 if IsArray($TweetArr) then
-$U=UBound($TweetArr)-1
+  $U=UBound($TweetArr)-1
   For $i = $u To 1 Step -1
-	 $TweetMessage = StringRegExp($TweetArr[$i],'(?s)(?i)<p(.*?)>(.*?)</p>',1)
+	 $TweetMessage = StringRegExp($TweetArr[$i][1],'(?s)(?i)<p(.*?)>(.*?)</p>',1)
 	 $mensaje=clearstring($TweetMessage[1])
 	 _sendmessages($mensaje)
   Next
@@ -20,7 +30,27 @@ Else
   exit 1
 endif
 
+func _mergeArray($array1,$array2)
+  $array1=_ArrayAdd_Column($array1)
+  $size = UBound($array1)
+  $newCol =UBound($array1,2)-1
+  For $i = 0 To $size - 1
+	 $array1[$i][$newCol] = $array2[$i]
+  Next
+;~   _ArrayDisplay($array1)
+  return $array1
+EndFunc
+Func _ArrayAdd_Column($Array)
+    Local $aTemp[UBound($Array)][UBound($Array, 0) + 1]
+    For $i = 0 To UBound($Array) - 1
 
+        For $j = 0 To UBound($Array, 0) - 1
+            If UBound($Array, 0) = 1 Then $aTemp[$i][0] = $Array[$i]
+            If UBound($Array, 0) > 1 Then $aTemp[$i][$j] = $Array[$i][$j]
+        Next
+    Next
+    Return $aTemp
+EndFunc  ;==>_ArrayAdd_Column
 Func _sendmessages($message)
   Local $fileh = FileOpen("..\..\secret\recipients.txt", 0)
   If $fileh = -1 Then
