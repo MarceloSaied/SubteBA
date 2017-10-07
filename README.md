@@ -56,15 +56,24 @@ alt="SubteBA Logo" height="100" width="200">
 * Archivo de configuracion
 	* los mensages se mandan a Telegram usando este usa un archivo de configuracion en el folder secret ( en un futuro sera copiado a temp folder en runtime)
 
-	El archivo de configuracion es el siguiente
+	El archivo de configuracion es Config.ini
+	
+	Campos del ini 
+	bot.name ==> Telegram Bot name
+	bot.token ==> Telegram bot token
+	dev.chatid ==> User chat ide for dev purposes
+	twitter.username ==> Twitter username to scrap page ( e.i subteba)
+	
+	
 	Config.ini
-
 	```ini
 	[bot]
 	name=@SubteBA_bot
 	token=bot4010332xxxxxxxx
 	[dev]
 	chatID=2x51xxxxx
+	[Twitter]
+	Username=subteba
 	```
 
 * Archivo de usuarios
