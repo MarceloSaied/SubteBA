@@ -12,6 +12,45 @@
 		;------------------------------------------------------------------------------
 	EndFunc   ;==>_ConfigDBInitial
 #endregion
+#region  ==== SQL functions =======================================================================
+	Func SQLInsertMessage($TweetID,$TweeMsg,$TweeDate)
+;~ 		ConsoleWrite('++InsertMessageSQL() = '& @crlf)
+		$query='INSERT INTO messages VALUES (' & $TweetID & ',"' & $TweeMsg & '" ,' & $TweeDate & ') ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+			return true
+		Else
+			MsgBox(48+4096,"Error inserting mesages ErrNo 1010" & @CRLF & $query,0,0)
+			Return false
+		EndIf
+	EndFunc
+	Func SQLGetUsers()
+;~ 		ConsoleWrite('++SQLGetUsers() = '& @crlf)
+		$query='SELECT * FROM Users ;'
+		_SQLITEqry($query,$dbfullPath)
+	EndFunc
+	Func SQLGetActiveUsers()
+;~ 		ConsoleWrite('++SQLGetActiveUsers() = '& @crlf)
+		$query='SELECT * FROM Users WHERE Active=1 ;'
+		_SQLITEqry($query,$dbfullPath)
+	EndFunc
+	Func SQLGetDevUsers()
+;~ 		ConsoleWrite('++SQLGetDevUsers() = '& @crlf)
+		$query='SELECT * FROM Users WHERE Active=1 AND Dev=1 ;'
+		_SQLITEqry($query,$dbfullPath)
+	EndFunc
+	Func SQLExist_Message($TweetID)
+;~ 		ConsoleWrite('++Exist_Message() = '&$TweetID& @crlf)
+		$query='SELECT id FROM messages WHERE id="'&$TweetID &'";'
+		_SQLITEqry($query,$dbfullPath)
+		If  IsArray($qryResult) Then
+			if UBound($qryResult)>1 then
+				return $qryResult[1][0]
+			EndIf
+			return 0
+		endif
+		Return 0
+	EndFunc
+#endregion
 #region  ==== send messages =======================================================================
 	Func SendTelegramMessages($TweetArr)
 		If IsArray($TweetArr) Then
@@ -24,23 +63,46 @@
 			Exit 21
 		EndIf
 	EndFunc
-	Func sendmessages($message)
-		Local $fileh = FileOpen("secret\recipients.txt", 0)
-		If $fileh = -1 Then
-			Exit 26
-		EndIf
-		While 1
-			Local $chatidLine = FileReadLine($fileh)
-			If @error = -1 Then ExitLoop
-			$chatidArr = StringSplit($chatidLine, ',')
-			$chatid = $chatidArr[1]
-			if $chatID<>"" then
-				ConsoleWrite('- $chatid = ' & $chatid & "  ->  " & $chatidArr[2] & @CRLF)
-				$respuesta = SendTelegramexec($chatid,$message)
+;~  	Func sendmessages($message)  ;~ from file of recipients
+;~ 		Local $fileh = FileOpen("secret\recipients.txt", 0)
+;~ 		If $fileh = -1 Then
+;~ 			Exit 26
+;~ 		EndIf
+;~ 		While 1
+;~ 			Local $chatidLine = FileReadLine($fileh)
+;~ 			If @error = -1 Then ExitLoop
+;~ 			$chatidArr = StringSplit($chatidLine, ',')
+;~ 			$chatid = $chatidArr[1]
+;~ 			if $chatID<>"" then
+;~ 				ConsoleWrite('- $chatid = ' & $chatid & "  ->  " & $chatidArr[2] & @CRLF)
+;~ 				$respuesta = SendTelegramexec($chatid,$message)
 ;~ 			$respuesta  0 is ok
-			endif
-		WEnd
-		FileClose($fileh)
+;~ 			endif
+;~ 		WEnd
+;~ 		FileClose($fileh)
+;~ 	EndFunc   ;==>_sendmessages
+	Func sendmessages($message)
+		SQLGetActiveUsers()
+		If  IsArray($qryResult) Then
+			for $i=1 to UBound($qryResult)-1
+				$isDev = $qryResult[$i][4]
+				$chatid = $qryResult[$i][0]
+				$ChatUser = $qryResult[$i][1] & " " & $qryResult[$i][2]
+				if $chatID<>"" then
+					select
+						Case $SendToAll = 1
+							ConsoleWrite('- $chatid = ' & $chatid & "  ->  " & $ChatUser & @CRLF)
+							$respuesta = SendTelegramexec($chatid,$message)
+						Case $isDev = 1 AND $SendToAll = 0
+							ConsoleWrite('- $chatid = ' & $chatid & "  ->  " & $ChatUser & @CRLF)
+							$respuesta = SendTelegramexec($chatid,$message)
+					endSelect
+					;~ $respuesta  0 is ok
+				endif
+			next
+			return true
+		endif
+		Return false
 	EndFunc   ;==>_sendmessages
 	Func SendTelegramexec($chatid,$msgtext="testeo harcoded")
 		local $token=IniRead("secret\config.ini","bot","token","")
@@ -87,18 +149,7 @@
 	EndFunc
 #endregion
 #region   ===========================================================================
-	Func Exist_Message($TweetID)
-;~ 		ConsoleWrite('++Exist_Message() = '&$TweetID& @crlf)
-		$query='SELECT id FROM messages WHERE id="'&$TweetID &'";'
-		_SQLITEqry($query,$dbfullPath)
-		If  IsArray($qryResult) Then
-			if UBound($qryResult)>1 then
-				return $qryResult[1][0]
-			EndIf
-			return 0
-		endif
-		Return 0
-	EndFunc
+
 	func closeall()
 		_SQLite_Close()
 		_SQLite_Shutdown()
@@ -147,5 +198,4 @@
 		ConsoleWrite('>> 	Output = ' & $sOutput & @crlf )
 		Return $sOutput
 	EndFunc   ;==>_GetDOSOutput
-
 #endregion

@@ -17,8 +17,10 @@
 		Global $EncryptDB=0
 
 	endfunc
-
 #endregion sqlite
+#region
+
+#endregion
 _DBvarInit()
 
 
