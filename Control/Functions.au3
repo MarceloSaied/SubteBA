@@ -67,18 +67,23 @@
 	EndFunc
 	Func _gettweetArr($htmltxt)
 		$MSGArr = StringRegExp($htmltxt, '(?s)(?i)<div class="js-tweet-text-container">(.*?)</DIV>', 3)
-		dim  $TweetMSGArr[UBound($MSGArr)]
-		For $i = 0 To UBound($MSGArr) -1
-			$TweetMessage = StringRegExp($MSGArr[$i], '(?s)(?i)<p(.*?)>(.*?)</p>', 1)
-			$mensaje = clearstring($TweetMessage[1])
-			$TweetMSGArr[$i]=$mensaje
-		Next
-		$TweetDate = StringRegExp($htmltxt, '(?s)(?i)data-time="(.*?)"', 3)
-		$TweetIDArr = StringRegExp($htmltxt, '(?s)(?i)data-tweet-id="(.*?)"', 3)
-		$TweetArrAux = _mergeArray($TweetIDArr, $TweetMSGArr)
-		$TweetArr = _mergeArray($TweetArrAux, $TweetDate)
-;~ 		_ArrayDisplay($TweetArr)
-		return $TweetArr
+		if IsArray($MSGArr) then
+			dim  $TweetMSGArr[UBound($MSGArr)]
+			For $i = 0 To UBound($MSGArr) -1
+				$TweetMessage = StringRegExp($MSGArr[$i], '(?s)(?i)<p(.*?)>(.*?)</p>', 1)
+				$mensaje = clearstring($TweetMessage[1])
+				$TweetMSGArr[$i]=$mensaje
+			Next
+			$TweetDate = StringRegExp($htmltxt, '(?s)(?i)data-time="(.*?)"', 3)
+			$TweetIDArr = StringRegExp($htmltxt, '(?s)(?i)data-tweet-id="(.*?)"', 3)
+			$TweetArrAux = _mergeArray($TweetIDArr, $TweetMSGArr)
+			$TweetArr = _mergeArray($TweetArrAux, $TweetDate)
+	;~ 		_ArrayDisplay($TweetArr)
+			return $TweetArr
+		Else
+			ConsoleWrite('!!!(' &  @ScriptLineNumber & ') : Error on  $MSGArr = ' & $MSGArr & @crlf )
+			return 0
+		endif
 	EndFunc
 #endregion
 #region   ===========================================================================
