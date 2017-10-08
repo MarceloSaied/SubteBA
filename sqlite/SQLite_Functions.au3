@@ -1,17 +1,12 @@
 	func SQLite_init()
 		ConsoleWrite('++SQLite_init() = ' & @crlf )
-		$sqliteDLLfile=$FgmDataFolderResources &"\System.Data.SQLite.32.2012.dll"
-;~ 		If FileExists($sqliteDLLfile) Then
-;~ 		Else
-;~ 			FileInstall("sqlite/System.Data.SQLite.32.2012.dll", $sqliteDLLfile, 1)
-;~ 		endif
+		$sqliteDLLfile=$FolderResources &"\System.Data.SQLite.32.2012.dll"
 		$sSQliteDll = _SQLite_Startup($sqliteDLLfile,0,1)
 		Local $err=@error
-		ConsoleWrite('>>$sSQliteDll = ' & $sSQliteDll & @crlf )
 		Sleep(1000)
 		if $sSQliteDll = "" then
 			MsgBox(16, "Database Error", "Database error . ErrNo 1000/" & $err & @CRLF & "version " & _SQLite_LibVersion())
-			Exit -1
+			Exit 11
 		EndIf
 	EndFunc
 	Func _SQLite_down()
@@ -20,7 +15,7 @@
 		$sSQliteDll =""
 	EndFunc
 	func _SQLITErun($SQLq,$DBfile,$quiet=true,$sqlClose=1)
-		If $quiet=true Then ConsoleWrite('-->_SQLITErun = ' & $DBfile & @crlf & " >> " & $SQLq & @crlf )
+		If $quiet=False Then ConsoleWrite('-->_SQLITErun = ' & $DBfile & @crlf & " >> " & $SQLq & @crlf )
 		$ExitOnError=1
 		Local $hDB=_SQLite_Open($DBfile)
 		If $EncryptDB Then _SQLite_Exec(-1, _PragmaQuery($DBfile,"") )
@@ -49,18 +44,21 @@
 		return true
 	EndFunc
 	Func _SQLITEqry($SQLq,$DBfile,$quiet=true,$sqlClose=1)
-		If $quiet=true Then ConsoleWrite('-->_SQLITEqry = ' & $DBfile & @crlf& " >> " & $SQLq & @crlf )
+		If $quiet=False Then ConsoleWrite('-->_SQLITEqry = ' & $DBfile & @crlf& " >> " & $SQLq & @crlf )
 		$ExitOnError=1
 		Local $hDB=_SQLite_Open($DBfile)
 		If $EncryptDB Then _SQLite_Exec(-1, _PragmaQuery($DBfile,"") )
 		local $iRows, $iColumns
-		$iRval = _SQLite_GetTable2d(-1,$SQLq, $qryResult, $iRows, $iColumns)
+		$iRval = _SQLite_GetTable2d($hDB,$SQLq, $qryResult, $iRows, $iColumns)
 		If $iRval = $SQLITE_OK  Or $iRval=$SQLITE_DONE Then
-			If $quiet=true Then
+			If $quiet=False Then
 				ConsoleWrite(" >> Rows="&ubound($qryResult,1)&"   Cols="&ubound($qryResult,2)&@crlf)
 				_SQLite_Display2DResult($qryResult)
 			endif
 		Else
+			If $iRval=21 Then
+				MsgBox(16, "Database Error: " & $iRval,"Database not found at "& $DBfile & ". check file/path . ErrNo 1001c" & @crlf & _SQLite_ErrMsg() & @crlf &  $SQLq  & @crlf & $DBfile  )
+			endif
 			If $iRval=26 Then
 				$encriptedMsg="DataBase file is encrypted or is not a database"
 				MsgBox(16, "Database Error: " & $iRval,"Database error . ErrNo 1001q" & @crlf & $encriptedMsg & @crlf & $DBfile  )
@@ -82,12 +80,8 @@
 	Func _PragmaQuery($db,$SQLq)
 	;~ 	ConsoleWrite('++_PragmaQuery() = '& @crlf)
 		Switch $db
-			Case $profiledbfile
-				$SQLq='PRAGMA key = "' & $profiledbencript & '";'&$SQLq
-			Case $FGMdbFile
-				$SQLq='PRAGMA key = "' & $FGMencript & '";'&$SQLq
-			Case $Basedbfile
-				$SQLq='PRAGMA key = "' & $basedbencript & '";'&$SQLq
+			Case $dbfile
+				$SQLq='PRAGMA key = "' & $defaultdbencript & '";'&$SQLq
 			case Else
 				$SQLq='PRAGMA key = "' & $defaultdbencript & '";'&$SQLq
 		EndSwitch

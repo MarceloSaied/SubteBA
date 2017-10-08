@@ -1,0 +1,37 @@
+
+0 not handeled
+- - - - - -
+GET-TWEET module
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10 ????????????????????GET-TWEET exited OK (get-tweet.au3)
+
+SQLite Module
+11 Database Error cannor start sqlite dll
+12
+13
+14
+15
+16
+17
+18
+19
+20
+functions
+21 SendTelegramMessages No messsages to send to telegram $TweetArr twitter arrar massages , is not an array
+22
+23
+24
+25 $nBytesRead < 100 data read fron tweeter , is too short  (_ScrapTweetMessages)
+26 Cant open recipients.txt (sendmessages)
+27
+28
+29
+30 SendTelegramMessages exited OK (functions.au3)
