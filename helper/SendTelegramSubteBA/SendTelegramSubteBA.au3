@@ -53,10 +53,10 @@ $chatID=""
    $helpText="Help:                                                                     " & @crlf & _
 			"                                                                           " & @crlf & _
 			"      Usage:                                                               " & @crlf & _
-			"          SendTelegramSubteBA.exe -m <message> -chatid chatid <optional>   " & @crlf & _
+			"          SendTelegramSubteBA.exe -m <message> -chatid chatid              " & @crlf & _
 			"                                                                           " & @crlf & _
 			"          -m   message                                                     " & @crlf & _
-			"          -chatid  chatid  <optional>                                      " & @crlf & _
+			"          -chatid  chatid                                                  " & @crlf & _
 			"                                                                           " & @crlf & _
 			"            Author: Saied, Marcelo                                         " & @crlf & _
 			"                                                                           " & @crlf & _
@@ -77,7 +77,7 @@ $chatID=""
 	endif
 ;~ 	ConsoleWrite('@@ Debug(' & @ScriptLineNumber & ') : $CmdLine[0] = ' & $CmdLine[0] & @crlf )
     if $CmdLine[0]<2 then  ; if no 3 argumentes then exit    -f filename  -u username -p password  ([-d][-nd])
-	  ConsoleWrite("No enough arguments. <Usage>: SendTelegramSubteBA.exe -m <message> -chatid  chatid  <optional>  ")
+	  ConsoleWrite("No enough arguments. <Usage>: SendTelegramSubteBA.exe -m <message> -chatid  chatid   ")
 	  exit 5
    endif
 
@@ -101,8 +101,9 @@ $chatID=""
 SendTelegram($mensaje)
 Func SendTelegram($msgtext="testeo")
 	if SendTelegramexec($msgtext) Then
-		sleep(3000)
-		if $chatID<>"" then	SendTelegramexec($msgtext)
+		exit 15
+	else
+		exit 20
 	endif
 EndFunc
 
