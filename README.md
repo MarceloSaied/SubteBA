@@ -95,7 +95,7 @@ alt="SubteBA Logo" height="100" width="200">
 	
 	| Tabla          | Campos    |  Triggers |Descripcion     | 
 	| :------------- |:----------|:----------|:---------------|
-	| Users   | UserID (Int)Ix, Fname (Text), Lname (Text), Active (Int) | CleanUp   | Users Info  | 
+	| Users |UserID (Int)Ix, Fname (Text), Lname (Text), Active (Bool), Dev (Bool)|CleanUp|Users Info| 
 	| Messages  | id (Int)Ix, Message (Text)                          |           | Scrapped messages  | 
 	| Users_Messages | UserID (Int)FK , MsgID (Int)FK                  |           | Users <-> Messages | 
 	|  |      |    |   | 
