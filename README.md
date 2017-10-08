@@ -89,6 +89,33 @@ alt="SubteBA Logo" height="100" width="200">
 
 	```
 - - -
+* Base de datos
+
+	Las tablas son:
+	
+	| Tabla          | Campos    |  Triggers |Descripcion     | 
+	| :------------- |:----------|:----------|:---------------|
+	| Users   | UserID (Int)Ix, Fname (Text), Lname (Text), Active (Int) | CleanUp   | Users Info  | 
+	| Messages  | id (Int)Ix, Message (Text)                          |           | Scrapped messages  | 
+	| Users_Messages | UserID (Int)FK , MsgID (Int)FK                  |           | Users <-> Messages | 
+	|  |      |    |   | 
+
+
+	
+	* Triggers ( DDL)
+	
+	CleanUp
+	Deletes records from Users_Messages on Users.Active is set to 0
+	
+	```SQL
+	CREATE TRIGGER "CleanUp" AFTER UPDATE OF "Active" ON "Users" WHEN new.Active =  0
+	BEGIN
+	   DELETE FROM Users_Messages WHERE Users_Messages.UserID  = OLD.UserID ;
+	END
+	```
+
+	
+	---
 
 - - -
 
