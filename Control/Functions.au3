@@ -81,7 +81,17 @@
 ;~ 		WEnd
 ;~ 		FileClose($fileh)
 ;~ 	EndFunc   ;==>_sendmessages
+	Func ReformatMessage($message)
+;~ 	ConsoleWrite('++ReformatMessage() = '& @crlf)
+		$msgArr=StringSplit($message,"Actualizado",1)
+		$diaHoraArr=stringsplit(StringStripWS($msgArr[2],1+2)," ")
+		$hora=$diaHoraArr[2]
+		$dia=$diaHoraArr[1]
+		$msg="<b>"&$hora&"</b>"&"     " & $dia&"%0A"&StringStripWS($msgArr[1],1+2)
+		return $msg
+	EndFunc
 	Func sendmessages($message)
+		$message=ReformatMessage($message)
 		SQLGetActiveUsers()
 		If  IsArray($qryResult) Then
 			for $i=1 to UBound($qryResult)-1
@@ -105,15 +115,16 @@
 		Return false
 	EndFunc   ;==>_sendmessages
 	Func SendTelegramexec($chatid,$msgtext="testeo harcoded")
-		local $token=IniRead("secret\config.ini","bot","token","")
-		$urlMSG="https://api.telegram.org/" & $token & "/sendMessage?chat_id=" & $chatid & "&text=" & $msgtext
+		$urlMSG="https://api.telegram.org/" & $token & "/sendMessage?chat_id=" & $chatid & _
+		"&text=" & $msgtext & "&parse_mode=HTML"
 		$sGet = HttpGet($urlMSG)
 
-		if $sGet<>"0" then
-			ConsoleWrite('Telegram Message sent = ' & $msgtext & @crlf )
+		if $sget<>"0"  then
+			ConsoleWrite('Tlgm sent = ' & $msgtext & @crlf )
 			return 0
 		Else
-			$s_text="Error sending message to Telegram = "
+			$s_text="Error sending message to Telegram = " & $sGet
+			ConsoleWrite('!! ' & $s_text & @crlf )
 			return 1
 		endif
 	EndFunc
@@ -146,6 +157,87 @@
 			ConsoleWrite('!!!(' &  @ScriptLineNumber & ') : Error on  $MSGArr = ' & $MSGArr & @crlf )
 			return 0
 		endif
+	EndFunc
+#endregion
+#region  ==== Bot Messages handeling ===================================================================
+	func UpdateUsers()
+		ConsoleWrite('  Update users ' & @crlf)
+		local $s=GetBotUpdates()
+		if $s then
+			$oJSON = _OO_JSON_Init()
+			$jsonObj = $oJSON.parse($s)
+			if $jsonObj.ok  then
+				if $jsonObj.jsonPath( "$.result").stringify() = "[[]]" then
+					ConsoleWrite(' No Bot data ' & @crlf)
+				Else
+					$UserIDArr = StripIntJS($jsonObj.jsonPath( "$.result..message.from.id").stringify())
+					$FnameArr = StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())
+					$LnameArr = StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
+					$epochArr = StripIntJS($jsonObj.jsonPath( "$.result..message.date").stringify())
+					for $i=1 to $UserIDArr[0]
+						SQLregister($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i])
+					next
+				endif
+			endif
+		endif
+	EndFunc
+	Func GetBotUpdates()
+		$urlMSG="https://api.telegram.org/" & $token & "/getUpdates"
+		$sGet = HttpGetJson($urlMSG)
+		if $sGet<>"" then
+			return $sGet
+		Else
+			$s_text="Error getUpdates from Telegram = "
+			ConsoleWrite('!! ' & $s_text & @crlf & "! " & $sGet)
+			return false
+		endif
+	EndFunc
+	Func StripStrJS($st)
+		$st=StringReplace($st,'","',":::")
+		$st=clearstring($st)
+		$st=StringReplace($st,"[","")
+		$st=StringReplace($st,"]","")
+		$st=StringReplace($st,'"',"")
+		$stArr=StringSplit($st,":::",1)
+		return $stArr
+	EndFunc
+	Func StripIntJS($st)
+		$st=StringReplace($st,',',":::")
+		$st=clearstring($st)
+		$st=StringReplace($st,"[","")
+		$st=StringReplace($st,"]","")
+		$st=StringReplace($st,'"',"")
+		$stArr=StringSplit($st,":::",1)
+		return $stArr
+	EndFunc
+	Func SQLregister($UserID,$Fname,$Lname,$epoch)
+;~ 	ConsoleWrite('++SQLregister() = '& @crlf)
+		if SQLExistUser($UserID)=0 then
+			SQLInsertUser($UserID,$Fname,$Lname,$epoch)
+		endif
+	EndFunc
+	Func SQLInsertUser($UserID,$Fname,$Lname,$epoch)
+;~ 	ConsoleWrite('++SQLInsertUser() = '& @crlf)
+		ConsoleWrite('  Nuevo usuario = '& $Fname & "  "  & $Lname  & @crlf)
+		$query='INSERT INTO Users VALUES (' & $UserID & ',"' & $Fname & '","' & $Lname & '",1,0,' & $epoch & ') ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+			return true
+		Else
+			MsgBox(48+4096,"Error inserting User ErrNo 1011" & @CRLF & $query,0,0)
+			Return false
+		EndIf
+	EndFunc
+	Func SQLExistUser($UserID)
+;~ 	ConsoleWrite('++SQLExistUser() = '& @crlf)
+		$query='SELECT UserID FROM Users WHERE UserID="'&$UserID &'";'
+		_SQLITEqry($query,$dbfullPath)
+		If  IsArray($qryResult) Then
+			if UBound($qryResult)>1 then
+				return $qryResult[1][0]
+			EndIf
+			return 0
+		endif
+		Return 0
 	EndFunc
 #endregion
 #region   ===========================================================================

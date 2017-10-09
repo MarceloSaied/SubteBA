@@ -4,6 +4,11 @@
 	if NOT FileExists($FolderResources) then DirCreate($FolderResources)
 	global $FolderBin=$WorkingFolder&"\bin"
 	if NOT FileExists($FolderBin) then DirCreate($FolderBin)
+	if @Compiled then
+		global $token=IniRead("config.ini","bot","token","")
+	Else
+		global $token=IniRead("secret\config.ini","bot","token","")
+	endif
 #endregion working files
 #region sqlite
 	func _DBvarInit()
@@ -19,7 +24,6 @@
 	endfunc
 #endregion sqlite
 #region
-
 #endregion
 _DBvarInit()
 

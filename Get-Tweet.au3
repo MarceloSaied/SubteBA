@@ -1,3 +1,15 @@
+#NoTrayIcon
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Icon=images\twirl.ico
+#AutoIt3Wrapper_Outfile=release\Get-Tweet.exe
+#AutoIt3Wrapper_UseUpx=n
+#AutoIt3Wrapper_Change2CUI=y
+#AutoIt3Wrapper_Res_Comment=SubteBA Telegram Alerter
+#AutoIt3Wrapper_Res_Description=SubteBA Telegram Alerter
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.15
+#AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
+#AutoIt3Wrapper_Res_LegalCopyright=By Marcelo Saied
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #region init
 	#NoTrayIcon
 	#include <Misc.au3>
@@ -6,8 +18,8 @@
 		Exit
 	EndIf
 
-$SendToAll=0 ; si es 0 solo se manda a Dev users
-              ; si es 1 se manda a todos
+	$SendToAll=0 ; si es 0 solo se manda a Dev users
+					  ; si es 1 se manda a todos
 
 
 	#include <includes\includes.au3>
@@ -33,12 +45,16 @@ while 1
 				ConsoleWrite('+ New messages ' & _NowTime(4) & @CRLF)
 			endif
 		Next
-		if $newMessagesFlag=0 then ConsoleWrite(' No new messages ' & _NowTime(4) & @CRLF)
+		if $newMessagesFlag=0 then ConsoleWrite('  No new messages ' & _NowTime(4) & @CRLF)
 	endif
-	$minutes=0.5
+
+	UpdateUsers()
+
+	$minutes=10
+	ConsoleWrite('   sleeping '&$minutes& @CRLF)
 	sleep($minutes*60*1000)
 wend
-;~ SendTelegramMessages($TweetArr)
+
 closeall()
 
 
