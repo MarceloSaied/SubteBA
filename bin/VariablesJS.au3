@@ -24,6 +24,7 @@
 	endfunc
 #endregion sqlite
 #region
+
 #endregion
 _DBvarInit()
 

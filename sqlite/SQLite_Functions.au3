@@ -1,6 +1,6 @@
 	func SQLite_init()
 		ConsoleWrite('++SQLite_init() = ' & @crlf )
-		$sqliteDLLfile=$FolderResources &"\System.Data.SQLite.32.2012.dll"
+		$sqliteDLLfile=$FolderBin &"\System.Data.SQLite.32.2012.dll"
 		$sSQliteDll = _SQLite_Startup($sqliteDLLfile,0,1)
 		Local $err=@error
 		Sleep(1000)

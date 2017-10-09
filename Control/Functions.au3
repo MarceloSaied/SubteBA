@@ -12,6 +12,45 @@
 		;------------------------------------------------------------------------------
 	EndFunc   ;==>_ConfigDBInitial
 #endregion
+#region  ==== SQL functions =======================================================================
+	Func SQLInsertMessage($TweetID,$TweeMsg,$TweeDate)
+;~ 		ConsoleWrite('++InsertMessageSQL() = '& @crlf)
+		$query='INSERT INTO messages VALUES (' & $TweetID & ',"' & $TweeMsg & '" ,' & $TweeDate & ') ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+			return true
+		Else
+			MsgBox(48+4096,"Error inserting mesages ErrNo 1010" & @CRLF & $query,0,0)
+			Return false
+		EndIf
+	EndFunc
+	Func SQLGetUsers()
+;~ 		ConsoleWrite('++SQLGetUsers() = '& @crlf)
+		$query='SELECT * FROM Users ;'
+		_SQLITEqry($query,$dbfullPath)
+	EndFunc
+	Func SQLGetActiveUsers()
+;~ 		ConsoleWrite('++SQLGetActiveUsers() = '& @crlf)
+		$query='SELECT * FROM Users WHERE Active=1 ;'
+		_SQLITEqry($query,$dbfullPath)
+	EndFunc
+	Func SQLGetDevUsers()
+;~ 		ConsoleWrite('++SQLGetDevUsers() = '& @crlf)
+		$query='SELECT * FROM Users WHERE Active=1 AND Dev=1 ;'
+		_SQLITEqry($query,$dbfullPath)
+	EndFunc
+	Func SQLExist_Message($TweetID)
+;~ 		ConsoleWrite('++Exist_Message() = '&$TweetID& @crlf)
+		$query='SELECT id FROM messages WHERE id="'&$TweetID &'";'
+		_SQLITEqry($query,$dbfullPath)
+		If  IsArray($qryResult) Then
+			if UBound($qryResult)>1 then
+				return $qryResult[1][0]
+			EndIf
+			return 0
+		endif
+		Return 0
+	EndFunc
+#endregion
 #region  ==== send messages =======================================================================
 	Func SendTelegramMessages($TweetArr)
 		If IsArray($TweetArr) Then
@@ -24,34 +63,68 @@
 			Exit 21
 		EndIf
 	EndFunc
-	Func sendmessages($message)
-		Local $fileh = FileOpen("secret\recipients.txt", 0)
-		If $fileh = -1 Then
-			Exit 26
-		EndIf
-		While 1
-			Local $chatidLine = FileReadLine($fileh)
-			If @error = -1 Then ExitLoop
-			$chatidArr = StringSplit($chatidLine, ',')
-			$chatid = $chatidArr[1]
-			if $chatID<>"" then
-				ConsoleWrite('- $chatid = ' & $chatid & "  ->  " & $chatidArr[2] & @CRLF)
-				$respuesta = SendTelegramexec($chatid,$message)
+;~  	Func sendmessages($message)  ;~ from file of recipients
+;~ 		Local $fileh = FileOpen("secret\recipients.txt", 0)
+;~ 		If $fileh = -1 Then
+;~ 			Exit 26
+;~ 		EndIf
+;~ 		While 1
+;~ 			Local $chatidLine = FileReadLine($fileh)
+;~ 			If @error = -1 Then ExitLoop
+;~ 			$chatidArr = StringSplit($chatidLine, ',')
+;~ 			$chatid = $chatidArr[1]
+;~ 			if $chatID<>"" then
+;~ 				ConsoleWrite('- $chatid = ' & $chatid & "  ->  " & $chatidArr[2] & @CRLF)
+;~ 				$respuesta = SendTelegramexec($chatid,$message)
 ;~ 			$respuesta  0 is ok
-			endif
-		WEnd
-		FileClose($fileh)
+;~ 			endif
+;~ 		WEnd
+;~ 		FileClose($fileh)
+;~ 	EndFunc   ;==>_sendmessages
+	Func ReformatMessage($message)
+;~ 	ConsoleWrite('++ReformatMessage() = '& @crlf)
+		$msgArr=StringSplit($message,"Actualizado",1)
+		$diaHoraArr=stringsplit(StringStripWS($msgArr[2],1+2)," ")
+		$hora=$diaHoraArr[2]
+		$dia=$diaHoraArr[1]
+		$msg="<b>"&$hora&"</b>"&"     " & $dia&"%0A"&StringStripWS($msgArr[1],1+2)
+		return $msg
+	EndFunc
+	Func sendmessages($message)
+		$message=ReformatMessage($message)
+		SQLGetActiveUsers()
+		If  IsArray($qryResult) Then
+			for $i=1 to UBound($qryResult)-1
+				$isDev = $qryResult[$i][4]
+				$chatid = $qryResult[$i][0]
+				$ChatUser = $qryResult[$i][1] & " " & $qryResult[$i][2]
+				if $chatID<>"" then
+					select
+						Case $SendToAll = 1
+							ConsoleWrite('- $chatid = ' & $chatid & "  ->  " & $ChatUser & @CRLF)
+							$respuesta = SendTelegramexec($chatid,$message)
+						Case $isDev = 1 AND $SendToAll = 0
+							ConsoleWrite('- $chatid = ' & $chatid & "  ->  " & $ChatUser & @CRLF)
+							$respuesta = SendTelegramexec($chatid,$message)
+					endSelect
+					;~ $respuesta  0 is ok
+				endif
+			next
+			return true
+		endif
+		Return false
 	EndFunc   ;==>_sendmessages
 	Func SendTelegramexec($chatid,$msgtext="testeo harcoded")
-		local $token=IniRead("secret\config.ini","bot","token","")
-		$urlMSG="https://api.telegram.org/" & $token & "/sendMessage?chat_id=" & $chatid & "&text=" & $msgtext
+		$urlMSG="https://api.telegram.org/" & $token & "/sendMessage?chat_id=" & $chatid & _
+		"&text=" & $msgtext & "&parse_mode=HTML"
 		$sGet = HttpGet($urlMSG)
 
-		if $sGet<>"0" then
-			ConsoleWrite('Telegram Message sent = ' & $msgtext & @crlf )
+		if $sget<>"0"  then
+			ConsoleWrite('Tlgm sent = ' & $msgtext & @crlf )
 			return 0
 		Else
-			$s_text="Error sending message to Telegram = "
+			$s_text="Error sending message to Telegram = " & $sGet
+			ConsoleWrite('!! ' & $s_text & @crlf )
 			return 1
 		endif
 	EndFunc
@@ -86,10 +159,77 @@
 		endif
 	EndFunc
 #endregion
-#region   ===========================================================================
-	Func Exist_Message($TweetID)
-;~ 		ConsoleWrite('++Exist_Message() = '&$TweetID& @crlf)
-		$query='SELECT id FROM messages WHERE id="'&$TweetID &'";'
+#region  ==== Bot Messages handeling ===================================================================
+	func UpdateUsers()
+		ConsoleWrite('  Update users ' & @crlf)
+		local $s=GetBotUpdates()
+		if $s then
+			$oJSON = _OO_JSON_Init()
+			$jsonObj = $oJSON.parse($s)
+			if $jsonObj.ok  then
+				if $jsonObj.jsonPath( "$.result").stringify() = "[[]]" then
+					ConsoleWrite(' No Bot data ' & @crlf)
+				Else
+					$UserIDArr = StripIntJS($jsonObj.jsonPath( "$.result..message.from.id").stringify())
+					$FnameArr = StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())
+					$LnameArr = StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
+					$epochArr = StripIntJS($jsonObj.jsonPath( "$.result..message.date").stringify())
+					for $i=1 to $UserIDArr[0]
+						SQLregister($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i])
+					next
+				endif
+			endif
+		endif
+	EndFunc
+	Func GetBotUpdates()
+		$urlMSG="https://api.telegram.org/" & $token & "/getUpdates"
+		$sGet = HttpGetJson($urlMSG)
+		if $sGet<>"" then
+			return $sGet
+		Else
+			$s_text="Error getUpdates from Telegram = "
+			ConsoleWrite('!! ' & $s_text & @crlf & "! " & $sGet)
+			return false
+		endif
+	EndFunc
+	Func StripStrJS($st)
+		$st=StringReplace($st,'","',":::")
+		$st=clearstring($st)
+		$st=StringReplace($st,"[","")
+		$st=StringReplace($st,"]","")
+		$st=StringReplace($st,'"',"")
+		$stArr=StringSplit($st,":::",1)
+		return $stArr
+	EndFunc
+	Func StripIntJS($st)
+		$st=StringReplace($st,',',":::")
+		$st=clearstring($st)
+		$st=StringReplace($st,"[","")
+		$st=StringReplace($st,"]","")
+		$st=StringReplace($st,'"',"")
+		$stArr=StringSplit($st,":::",1)
+		return $stArr
+	EndFunc
+	Func SQLregister($UserID,$Fname,$Lname,$epoch)
+;~ 	ConsoleWrite('++SQLregister() = '& @crlf)
+		if SQLExistUser($UserID)=0 then
+			SQLInsertUser($UserID,$Fname,$Lname,$epoch)
+		endif
+	EndFunc
+	Func SQLInsertUser($UserID,$Fname,$Lname,$epoch)
+;~ 	ConsoleWrite('++SQLInsertUser() = '& @crlf)
+		ConsoleWrite('  Nuevo usuario = '& $Fname & "  "  & $Lname  & @crlf)
+		$query='INSERT INTO Users VALUES (' & $UserID & ',"' & $Fname & '","' & $Lname & '",1,0,' & $epoch & ') ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+			return true
+		Else
+			MsgBox(48+4096,"Error inserting User ErrNo 1011" & @CRLF & $query,0,0)
+			Return false
+		EndIf
+	EndFunc
+	Func SQLExistUser($UserID)
+;~ 	ConsoleWrite('++SQLExistUser() = '& @crlf)
+		$query='SELECT UserID FROM Users WHERE UserID="'&$UserID &'";'
 		_SQLITEqry($query,$dbfullPath)
 		If  IsArray($qryResult) Then
 			if UBound($qryResult)>1 then
@@ -99,6 +239,9 @@
 		endif
 		Return 0
 	EndFunc
+#endregion
+#region   ===========================================================================
+
 	func closeall()
 		_SQLite_Close()
 		_SQLite_Shutdown()
@@ -147,5 +290,4 @@
 		ConsoleWrite('>> 	Output = ' & $sOutput & @crlf )
 		Return $sOutput
 	EndFunc   ;==>_GetDOSOutput
-
 #endregion

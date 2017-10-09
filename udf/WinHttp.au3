@@ -19,6 +19,25 @@ Func HttpGet($sURL, $sData = "")
 	If (@error) Then Return SetError(1, 0, 0)
 	$oHTTP.Send()
 	If (@error) Then Return SetError(2, 0, 0)
+	IF $oHTTP.Status="400" THEN
+		ConsoleWrite('@@$ HttpGet oHTTP.Status='&$oHTTP.Status & @crlf )
+		ConsoleWrite('@@$oHTTP.ResponseText = ' & $oHTTP.ResponseText & @crlf )
+	ENDIF
 	If ($oHTTP.Status <> $HTTP_STATUS_OK) Then Return SetError(3, 0, 0)
 	Return SetError(0, 0, $oHTTP.ResponseText)
 EndFunc
+
+Func HttpGetJson($sURL)
+	Local $oHTTP = ObjCreate("Microsoft.XMLHTTP")
+	$oHTTP.Open("GET", $sURL , False)
+	If (@error) Then Return SetError(1, 0, 0)
+	$oHTTP.Send()
+	If (@error) Then Return SetError(2, 0, 0)
+	IF $oHTTP.Status="400" THEN
+		ConsoleWrite('@@HttpGetJson $oHTTP.Status='&$oHTTP.Status & @crlf )
+		ConsoleWrite('@@$oHTTP.ResponseText = ' & $oHTTP.ResponseText & @crlf )
+	ENDIF
+	If ($oHTTP.Status <> $HTTP_STATUS_OK) Then Return SetError(3, 0, 0)
+	Return SetError(0, 0, $oHTTP.ResponseText)
+EndFunc
+
