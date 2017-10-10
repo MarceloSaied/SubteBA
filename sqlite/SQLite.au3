@@ -1,6 +1,7 @@
 #include-once
-#IgnoreFunc __SQLite_Inline_Version, __SQLite_Inline_Modified
 
+#IgnoreFunc__SQLite_Inline_Modified
+#IgnoreFunc__SQLite_Inline_Version
 #include "Array.au3" 	; Using: _ArrayAdd(),_ArrayDelete(),_ArraySearch()
 #include "File.au3" 	; Using: _TempFile()
 
