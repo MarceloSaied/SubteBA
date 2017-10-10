@@ -291,4 +291,17 @@
 		ConsoleWrite('>> 	Output = ' & $sOutput & @crlf )
 		Return $sOutput
 	EndFunc   ;==>_GetDOSOutput
+	Func _timeBetween($cTime, $sTime, $eTime)
+		 If Not _DateIsValid('2000/01/01 ' & $cTime) Then Return -1
+		 If Not _DateIsValid('2000/01/01 ' & $sTime) Then Return -2
+		 If Not _DateIsValid('2000/01/01 ' & $eTime) Then Return -3
+		 ;~  ConsoleWrite(_DateDiff('s', '2000/01/01 ' & $cTime & ':00', '2000/01/01 ' & $sTime & ':00') & @CRLF)
+		 ;~  ConsoleWrite(_DateDiff('s', '2000/01/01 ' & $cTime & ':00', '2000/01/01 ' & $eTime & ':00') & @CRLF)
+		 If _DateDiff('s', '2000/01/01 ' & $cTime & ':00', '2000/01/01 ' & $sTime & ':00') < 0 And _
+			 _DateDiff('s', '2000/01/01 ' & $cTime & ':00', '2000/01/01 ' & $eTime & ':00') > 0 Then
+			  Return 1
+		 Else
+			  Return 0
+		 EndIf
+	EndFunc  ; ==>_timeBetween
 #endregion
