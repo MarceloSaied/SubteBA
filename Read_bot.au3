@@ -18,6 +18,7 @@
 ;~ Local $s='{"ok":true,"result":[{"update_id":566511567,"message":{"message_id":453,"from":{"id":205102520,"is_bot":false,"first_name":"Marcelo","last_name":"Saied","language_code":"en-US"},"chat":{"id":205102519,"first_name":"Marcelo","last_name":"Saied","type":"private"},"date":1507501930,"text":"hello there"}},{"update_id":566511568,"message":{"message_id":454,"from":{"id":205102521,"is_bot":false,"first_name":"Marcelo","last_name":"Saied","language_code":"en-US"},"chat":{"id":205102521,"first_name":"Marcelo","last_name":"Saied","type":"private"},"date":1507507372,"text":"msg1"}},{"update_id":566511569,"message":{"message_id":455,"from":{"id":205102522,"is_bot":false,"first_name":"Marcelo","last_name":"Saied","language_code":"en-US"},"chat":{"id":205102519,"first_name":"Marcelo","last_name":"Saied","type":"private"},"date":1507513642,"text":"mensage2 , coma, mensage3"}}]}'
 
 local $s=GetBotUpdates()
+$s=StringReplace($s,'"username":','"last_name":')
 if $s then
 	$oJSON = _OO_JSON_Init()
 	$jsonObj = $oJSON.parse($s)
