@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=SubteBA Telegram Alerter
 #AutoIt3Wrapper_Res_Description=SubteBA Telegram Alerter
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.20
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.21
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_LegalCopyright=By Marcelo Saied
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -28,29 +28,36 @@
 
 local $Username=IniRead("..\..\secret\config.ini","Twitter","Username","subteba")
 while 1
-	$htmltxt=_ScrapTweetMessages($Username)
-	$TweetArr = _gettweetArr($htmltxt)
-	if IsArray($TweetArr) then
-		$newMessagesFlag=0
-		For $i = 0 To UBound($TweetArr) -1
-			$TweetID = $TweetArr[$i][0]
-			$TweeMsg = $TweetArr[$i][1]
-			$TweeDate = $TweetArr[$i][2]
-			if not SQLExist_Message($TweetID) then
-				SQLInsertMessage($TweetID,$TweeMsg,$TweeDate)
-				sendmessages($TweeMsg)
-				$newMessagesFlag=1
-				ConsoleWrite('+ New messages ' & _NowTime(4) & @CRLF)
-			endif
-		Next
-		if $newMessagesFlag=0 then ConsoleWrite('  No new messages ' & _NowTime(4) & @CRLF)
+;~ Get tweeter data , and send messages
+	If _timeBetween(@HOUR & ':' & @MIN, $StartTimeScrap, $EndTimeScrap) then
+		$htmltxt=_ScrapTweetMessages($Username)
+		$TweetArr = _gettweetArr($htmltxt)
+		if IsArray($TweetArr) then
+			$newMessagesFlag=0
+			For $i = 0 To UBound($TweetArr) -1
+				$TweetID = $TweetArr[$i][0]
+				$TweeMsg = $TweetArr[$i][1]
+				$TweeDate = $TweetArr[$i][2]
+				if not SQLExist_Message($TweetID) then
+					SQLInsertMessage($TweetID,$TweeMsg,$TweeDate)
+					sendmessages($TweeMsg)
+					$newMessagesFlag=1
+					ConsoleWrite('+ New messages ' & _NowTime(4) & @CRLF)
+				endif
+			Next
+			if $newMessagesFlag=0 then ConsoleWrite('  No new messages ' & _NowTime(4) & @CRLF)
+		endif
+	Else
+		ConsoleWrite('  Out of Scrap Time '& @CRLF)
 	endif
-
-	UpdateUsers()
 
 	$minutes=7
 	ConsoleWrite('   sleeping '&$minutes& @CRLF)
 	sleep($minutes*60*1000)
+
+	If _timeBetween(@HOUR & ':' & @MIN, $StartTimeBot, $EndTimeBot) then
+		UpdateUsers()
+	endif
 wend
 
 closeall()

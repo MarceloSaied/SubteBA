@@ -23,7 +23,11 @@
 
 	endfunc
 #endregion sqlite
-#region
+#region Tweeter reads
+	global $StartTimeScrap=IniRead("config.ini","Times","StartTimeScrapHH:MM","00:00")
+	global $StartTimeBot=IniRead("config.ini","Times","StartTimeBotHH:MM","00:00")
+	global $EndTimeScrap=IniRead("config.ini","Times","EndTimeScrapHH:MM","23:59")
+	global $EndTimeBot=IniRead("config.ini","Times","EndTimeBotHH:MM","23:59")
 #endregion
 _DBvarInit()
 
