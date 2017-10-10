@@ -163,6 +163,7 @@
 	func UpdateUsers()
 		ConsoleWrite('  Update users ' & @crlf)
 		local $s=GetBotUpdates()
+		$s=StringReplace($s,'"username":','"last_name":')
 		if $s then
 			$oJSON = _OO_JSON_Init()
 			$jsonObj = $oJSON.parse($s)

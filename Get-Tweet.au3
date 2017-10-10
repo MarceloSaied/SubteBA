@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=SubteBA Telegram Alerter
 #AutoIt3Wrapper_Res_Description=SubteBA Telegram Alerter
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.15
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.20
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_LegalCopyright=By Marcelo Saied
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -18,15 +18,13 @@
 		Exit
 	EndIf
 
-	$SendToAll=0 ; si es 0 solo se manda a Dev users
+	$SendToAll=1 ; si es 0 solo se manda a Dev users
 					  ; si es 1 se manda a todos
 
 
 	#include <includes\includes.au3>
 	_ConfigInitial()
 #endregion init
-
-
 
 local $Username=IniRead("..\..\secret\config.ini","Twitter","Username","subteba")
 while 1
@@ -50,7 +48,7 @@ while 1
 
 	UpdateUsers()
 
-	$minutes=10
+	$minutes=7
 	ConsoleWrite('   sleeping '&$minutes& @CRLF)
 	sleep($minutes*60*1000)
 wend
