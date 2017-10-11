@@ -52,7 +52,7 @@
 	EndFunc
 #endregion
 #region  ==== send messages =======================================================================
-	Func SendTelegramMessages($TweetArr)
+	Func SendTelegramMessages111($TweetArr)
 		If IsArray($TweetArr) Then
 			$U = UBound($TweetArr) - 1
 			For $i = $u To 1 Step -1
@@ -129,7 +129,7 @@
 		endif
 	EndFunc
 #endregion
-#region  ==== Tweeter handeling ===================================================================
+#region  ==== Tweeter scrapping ===================================================================
 	func _ScrapTweetMessages($Username)
 		Local $sData = InetRead("https://twitter.com/"&$Username)
 		Local $nBytesRead = @extended
