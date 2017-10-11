@@ -1,12 +1,12 @@
-#region ===========================================================================
+#region ====INIT ===============================================================
 	Func _ConfigInitial()
-		ConsoleWrite('++ConfigDBInitial() = ' & @CRLF)
+;~ 		ConsoleWrite('++ConfigDBInitial() = ' & @CRLF)
 		_SQLite_down()
 ;~ 		_DBvarInit()
 		; -------check if SQLIte SubteBA db exist
 		SQLite_init()
-	;~ 	$SQLq = "SELECT name FROM sqlite_temp_master WHERE type='table';"
-	;~ 	_SQLITErun($SQLq, $dbfile, $quietSQLQuery)
+		$SQLq = "SELECT name FROM sqlite_temp_master WHERE type='table';"
+		_SQLITErun($SQLq, $dbfile, $quietSQLQuery)
 	;~ 	;-------- Init Log
 	;~ 	_initLog()
 		;------------------------------------------------------------------------------
