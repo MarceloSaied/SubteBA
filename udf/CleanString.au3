@@ -20,6 +20,7 @@ Func _Latin_char_Remover($string_to_change)
 	 $string_to_change = StringReplace($string_to_change, 'iº', 'u')
 	 $string_to_change = StringReplace($string_to_change, 'Ã©', 'e')
 	 $string_to_change = StringReplace($string_to_change, 'Ã³', 'o')
+	 $string_to_change = StringReplace($string_to_change, 'Ã¡', 'a')
 ;~ 	 $string_to_change = StringReplace($string_to_change, 'Ã', 'i')
 
 	 $string_to_change = StringReplace($string_to_change, 'á', 'a')
