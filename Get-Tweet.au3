@@ -18,7 +18,7 @@
 		Exit
 	EndIf
 
-	$SendToAll=1 ; si es 0 solo se manda a Dev users
+	$SendToAll=0 ; si es 0 solo se manda a Dev users
 					  ; si es 1 se manda a todos
 
 
@@ -42,7 +42,7 @@ while 1
 					SQLInsertMessage($TweetID,$TweeMsg,$TweeDate)
 					sendmessages($TweeMsg)
 					$newMessagesFlag=1
-					ConsoleWrite('+ New messages ' & _NowTime(4) & @CRLF)
+					ConsoleWrite('+ New messages ' & _NowTime(4) & "   ")
 				endif
 				sleep(2000)
 			Next

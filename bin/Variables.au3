@@ -18,7 +18,6 @@
 		global $quietSQLQuery = 1
 		global $dbfile ="SubteBA.db"
 		global $dbfullPath = $FolderResources & "\" & $dbfile
-		ConsoleWrite('@@$dbfullPath = ' & $dbfullPath & @crlf )
 		global $sqliteDLLfile="System.Data.SQLite.32.2012.dll"
 		global $sSQliteDll =""
 		Global $EncryptDB=0

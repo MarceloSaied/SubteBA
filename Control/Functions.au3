@@ -133,7 +133,7 @@
 	func _ScrapTweetMessages($Username)
 		Local $sData = InetRead("https://twitter.com/"&$Username)
 		Local $nBytesRead = @extended
-		ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $nBytesRead = ' & $nBytesRead & @CRLF)
+		ConsoleWrite('@@ BytesRead = ' & $nBytesRead &"   ")
 		$htmltxt = BinaryToString($sData)
 		If $nBytesRead < 100 Then	Exit 25
 		return $htmltxt
