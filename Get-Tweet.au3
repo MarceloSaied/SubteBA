@@ -44,14 +44,15 @@ while 1
 					$newMessagesFlag=1
 					ConsoleWrite('+ New messages ' & _NowTime(4) & @CRLF)
 				endif
+				sleep(2000)
 			Next
 			if $newMessagesFlag=0 then ConsoleWrite('  No new messages ' & _NowTime(4) & @CRLF)
 		endif
 	Else
-		ConsoleWrite('  Out of Scrap Time '& @CRLF)
+		ConsoleWrite('  Out of Scrap Time '& $StartTimeScrap & "  To "  & $EndTimeScrap & @CRLF)
 	endif
 
-	$minutes=7
+	$minutes=5
 	ConsoleWrite('   sleeping '&$minutes& @CRLF)
 	sleep($minutes*60*1000)
 

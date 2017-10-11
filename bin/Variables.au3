@@ -20,14 +20,14 @@
 		global $sqliteDLLfile="System.Data.SQLite.32.2012.dll"
 		global $sSQliteDll =""
 		Global $EncryptDB=0
-
 	endfunc
 #endregion sqlite
 #region Tweeter reads
-	global $StartTimeScrap=IniRead("config.ini","Times","StartTimeScrapHH:MM","00:00")
-	global $StartTimeBot=IniRead("config.ini","Times","StartTimeBotHH:MM","00:00")
-	global $EndTimeScrap=IniRead("config.ini","Times","EndTimeScrapHH:MM","23:59")
-	global $EndTimeBot=IniRead("config.ini","Times","EndTimeBotHH:MM","23:59")
+	global $token=IniRead($configPath,"bot","token","")
+	global $StartTimeScrap=IniRead($configPath,"Times","StartTimeScrapHH:MM","00:00")
+	global $StartTimeBot=IniRead($configPath,"Times","StartTimeBotHH:MM","00:00")
+	global $EndTimeScrap=IniRead($configPath,"Times","EndTimeScrapHH:MM","23:59")
+	global $EndTimeBot=IniRead($configPath,"Times","EndTimeBotHH:MM","23:59")
 #endregion
 _DBvarInit()
 
