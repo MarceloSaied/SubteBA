@@ -53,6 +53,8 @@ if $s then
 ;~ 			ConsoleWrite("=5===TEXT==================================="  & @CR)
 ;~ 			ConsoleWrite("-> " & $jsonObj.jsonPath( "$.result..message.text").stringify() &  @CR )
 
+			$UpdateIDArr = StripIntJS($jsonObj.jsonPath( "$.result..update_id").stringify()  )
+			_printFromArray($UpdateIDArr)
 			$UserIDArr = StripIntJS($jsonObj.jsonPath( "$.result..message.from.id").stringify())
 			_printFromArray($UserIDArr)
 			$FnameArr = StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())

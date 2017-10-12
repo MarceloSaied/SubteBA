@@ -20,7 +20,6 @@
 		global $sqliteDLLfile="System.Data.SQLite.32.2012.dll"
 		global $sSQliteDll =""
 		Global $EncryptDB=0
-
 	endfunc
 #endregion sqlite
 #region Configuration

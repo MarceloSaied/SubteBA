@@ -9,8 +9,7 @@
 	Else
 		global $configPath="secret\config.ini"
 	endif
-
-
+	global $OffsetFile=$FolderResources&"\OffSet.txt"
 #endregion working files
 #region sqlite
 	func _DBvarInit()
@@ -18,6 +17,7 @@
 		global $quietSQLQuery = 1
 		global $dbfile ="SubteBA.db"
 		global $dbfullPath = $FolderResources & "\" & $dbfile
+		ConsoleWrite('@@'&@ScriptLineNumber&"  "&$dbfullPath & @crlf )
 		global $sqliteDLLfile="System.Data.SQLite.32.2012.dll"
 		global $sSQliteDll =""
 		Global $EncryptDB=0

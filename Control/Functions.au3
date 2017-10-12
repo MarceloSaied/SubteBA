@@ -160,30 +160,101 @@
 	EndFunc
 #endregion
 #region  ==== Bot Messages handeling ===================================================================
+	Func Get_BotOffSet()
+		ConsoleWrite('++Get_BotOffSet() = '& @crlf)
+		if NOT FileExists($OffsetFile) then
+			$fileh = FileOpen($OffsetFile,1+8)
+			If $fileh = -1 Then
+				ConsoleWrite('   "Unable to open file 1.' & $OffsetFile )
+				return 0
+			endif
+			FileClose($fileh)
+		EndIf
+		$fileh = FileOpen($OffsetFile,0)
+		If $fileh = -1 Then
+			ConsoleWrite('   "Unable to open file 2.' & $OffsetFile )
+			return 0
+		endif
+		Local $offset = FileReadLine($fileh)
+		if @error = -1 Then
+			FileClose($fileh)
+			return 0
+		endif
+		ConsoleWrite("Get OffSet:"& $offset)
+		FileClose($fileh)
+		return $offset
+	EndFunc
+	Func Set_BotOffSet($offset)
+		ConsoleWrite('++Set_BotOffSet() = '&$offset& @crlf)
+		if NOT FileExists($OffsetFile) then
+			$fileh = FileOpen($OffsetFile,1+8)
+			If $fileh = -1 Then
+				ConsoleWrite('   "Unable to open file 3.' & $OffsetFile )
+				return 0
+			endif
+			FileClose($fileh)
+		EndIf
+		$fileh = FileOpen($OffsetFile,1)
+		If $fileh = -1 Then
+			ConsoleWrite('   "Unable to open file 4.' & $OffsetFile )
+			return 0
+		endif
+		FileWriteLine($fileh,$offset)
+		if @error = -1 Then
+			FileClose($fileh)
+			return 0
+		endif
+		ConsoleWrite("Set OffSet:"& $offset)
+		FileClose($fileh)
+		return 1
+	EndFunc
 	func UpdateUsers()
-		ConsoleWrite('  Update users ' & @crlf)
+		ConsoleWrite('  Update users ' )
 		local $s=GetBotUpdates()
-		$s=StringReplace($s,'"username":','"last_name":')
 		if $s then
-			$oJSON = _OO_JSON_Init()
-			$jsonObj = $oJSON.parse($s)
-			if $jsonObj.ok  then
-				if $jsonObj.jsonPath( "$.result").stringify() = "[[]]" then
-					ConsoleWrite(' No Bot data ' & @crlf)
-				Else
-					$UserIDArr = StripIntJS($jsonObj.jsonPath( "$.result..message.from.id").stringify())
-					$FnameArr = StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())
-					$LnameArr = StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
-					$epochArr = StripIntJS($jsonObj.jsonPath( "$.result..message.date").stringify())
-					for $i=1 to $UserIDArr[0]
-						SQLregister($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i])
-					next
+			$s=ParseForUserUpdate($s)
+			if $s then
+				ConsoleWrite('  Updating... ' & @crlf)
+				$oJSON = _OO_JSON_Init()
+				$jsonObj = $oJSON.parse($s)
+				if $jsonObj.ok  then
+					if $jsonObj.jsonPath( "$.result").stringify() = "[[]]" then
+						ConsoleWrite(' No Bot data ' & @crlf)
+					Else
+						$UpdateIDArr = StripIntJS($jsonObj.jsonPath( "$.result..update_id").stringify()  )
+						$UserIDArr =   StripIntJS($jsonObj.jsonPath( "$.result..message.from.id").stringify())
+						$FnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())
+						$LnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
+						$epochArr =    StripIntJS($jsonObj.jsonPath( "$.result..message.date").stringify())
+						$menssageArr = StripStrJS($jsonObj.jsonPath( "$.result..message.text").stringify())
+						if  $UserIDArr[0] = $UpdateIDArr[0] AND $UserIDArr[0] = $FnameArr[0] AND $UserIDArr[0] = $LnameArr[0]  AND $UserIDArr[0] = $epochArr[0]  AND $UserIDArr[0] = $menssageArr[0] then
+							$retBad=0
+							for $i=1 to $UserIDArr[0]
+								$ret=SQLregister($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i])
+								ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $ret = ' & $ret & @crlf )
+								if Not $ret then	$retBad+=1
+									ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $retBad = ' & $retBad & @crlf )
+								$UpdateID=$UpdateIDArr[$i]
+							next
+							if $retBad=0 then Set_BotOffSet($UpdateID)
+								ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $retBad = ' & $retBad & @crlf )
+						Else
+							_printFromArray($UserIDArr)
+							_printFromArray($FnameArr)
+							_printFromArray($LnameArr)
+							_printFromArray($epochArr)
+							_printFromArray($menssageArr)
+							ConsoleWrite('  Error in JS array . exiting..... ' & @crlf)
+							exit 29
+						endif
+					endif
 				endif
 			endif
 		endif
 	EndFunc
 	Func GetBotUpdates()
-		$urlMSG="https://api.telegram.org/" & $token & "/getUpdates"
+		$offset=Get_BotOffSet()
+		$urlMSG="https://api.telegram.org/" & $token & "/getUpdates?offset="&$offset
 		$sGet = HttpGetJson($urlMSG)
 		if $sGet<>"" then
 			return $sGet
@@ -211,20 +282,49 @@
 		$stArr=StringSplit($st,":::",1)
 		return $stArr
 	EndFunc
-	Func SQLregister($UserID,$Fname,$Lname,$epoch)
+	Func ParseForUserUpdate($s)
+;~ 		eliminate contact info
+		$s=StringRegExpReplace($s,'(?s)(?i)"contact":(.*?)}'  ,  '"text": ""' )
+;~ 		replace username last-name
+		$s=StringReplace($s,'"username":','"last_name":')
+		return $s
+	EndFunc
+	Func SQLregister($UserID,$Fname,$Lname,$epoch,$mensage)
 ;~ 	ConsoleWrite('++SQLregister() = '& @crlf)
-		if SQLExistUser($UserID)=0 then
-			SQLInsertUser($UserID,$Fname,$Lname,$epoch)
+		$existUser=0
+		If SQLExistUser($UserID)=$userID then $existUser=1
+		if $existUser=0 then
+			$setactive=1
+			$ret=SQLInsertUser($UserID,$Fname,$Lname,$epoch,$setactive)
+			ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $ret = ' & $ret & @crlf )
+			return $ret
+		endif
+		 $setactive=""
+		if AIMessage($mensage,"/START") then $setactive=1
+		if AIMessage($mensage,"/STOP") then $setactive=0
+		if $existUser=1 AND $setactive<>"" then
+			$ret=SQLUpdateUserActive($UserID,$Fname,$Lname,$setactive)
+			ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $ret = ' & $ret & @crlf )
+			return $ret
 		endif
 	EndFunc
-	Func SQLInsertUser($UserID,$Fname,$Lname,$epoch)
-;~ 	ConsoleWrite('++SQLInsertUser() = '& @crlf)
+	Func SQLInsertUser($UserID,$Fname,$Lname,$epoch,$active=1)
 		ConsoleWrite('  Nuevo usuario = '& $Fname & "  "  & $Lname  & @crlf)
-		$query='INSERT INTO Users VALUES (' & $UserID & ',"' & $Fname & '","' & $Lname & '",1,0,' & $epoch & ') ;'
+		$query='INSERT INTO Users VALUES (' & $UserID & ',"' & $Fname & '","' & $Lname & '",' & $active &',0,' & $epoch & ') ;'
 		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
 			return true
 		Else
 			MsgBox(48+4096,"Error inserting User ErrNo 1011" & @CRLF & $query,0,0)
+			Return false
+		EndIf
+	EndFunc
+	Func SQLUpdateUserActive($UserID,$Fname,$Lname,$active=1)
+		ConsoleWrite('  Usuario Activo = '& $Fname & "  "  & $Lname  & @crlf)
+		$query='UPDATE  Users SET Active=' & $active &' WHERE UserID='& $UserID & ' ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+			return true
+		Else
+			MsgBox(48+4096,"Error updating active user User ErrNo 1012" & @CRLF & $query,0,0)
 			Return false
 		EndIf
 	EndFunc
@@ -242,7 +342,6 @@
 	EndFunc
 #endregion
 #region   ===========================================================================
-
 	func closeall()
 		_SQLite_Close()
 		_SQLite_Shutdown()
