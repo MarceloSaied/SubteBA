@@ -22,6 +22,7 @@
 	#include <..\SQLite\SQLite.au3>
 	#include <SQLite.dll.au3>
 	#include <..\SQLite\SQLite_Functions.au3>
+	#include <..\control\AI.au3>
 	#include <..\control\functions.au3>
 
 #endregion
