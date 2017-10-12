@@ -258,6 +258,7 @@
 		$offset=Get_BotOffSet()
 		$urlMSG="https://api.telegram.org/" & $token & "/getUpdates?offset="&$offset
 		$sGet = HttpGetJson($urlMSG)
+		ConsoleWrite('@@(' & @ScriptLineNumber & ') : $sGet = ' & $sGet & @crlf )
 		if $sGet<>"" then
 			return $sGet
 		Else
@@ -320,7 +321,7 @@
 		EndIf
 	EndFunc
 	Func SQLUpdateUserActive($UserID,$Fname,$Lname,$active=1)
-		ConsoleWrite('    Usuario Activo 1/Start 0/Stop= '&$active& "  " & $Fname & "  "  & $Lname  & "   ")
+		ConsoleWrite('    Usuario Activo 1/Start 0/Stop= '&$active& "  " & $Fname & "  "  & $Lname  & @crlf)
 		$query='UPDATE  Users SET Active=' & $active &' WHERE UserID='& $UserID & ' ;'
 		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
 			return true

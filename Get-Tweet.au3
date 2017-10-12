@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=SubteBA Telegram Alerter
 #AutoIt3Wrapper_Res_Description=SubteBA Telegram Alerter
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.23
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.25
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_LegalCopyright=By Marcelo Saied
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -61,7 +61,7 @@ while 1
 	If _timeBetween(@HOUR & ':' & @MIN, $StartTimeBot, $EndTimeBot) then
 		UpdateUsers()
 	endif
-	$minutes=1
+	$minutes=5
 	ConsoleWrite('   sleeping '&$minutes& " Min" & @CRLF)
 	sleep($minutes*60*1000)
 wend
