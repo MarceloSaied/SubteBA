@@ -1,5 +1,5 @@
 	func SQLite_init()
-		ConsoleWrite('++SQLite_init() = ' & @crlf )
+;~ 		ConsoleWrite('++SQLite_init() = ' & @crlf )
 		$sqliteDLLfile=$FolderBin &"\System.Data.SQLite.32.2012.dll"
 		$sSQliteDll = _SQLite_Startup($sqliteDLLfile,0,1)
 		Local $err=@error
@@ -10,7 +10,7 @@
 		EndIf
 	EndFunc
 	Func _SQLite_down()
-		ConsoleWrite('++_SQLite_down() = ' & @crlf )
+;~ 		ConsoleWrite('++_SQLite_down() = ' & @crlf )
 		If $sSQliteDll<>"" Then DllClose($sSQliteDll)
 		$sSQliteDll =""
 	EndFunc

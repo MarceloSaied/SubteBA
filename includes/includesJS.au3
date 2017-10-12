@@ -18,7 +18,9 @@
 #endregion internal UDF
 #region BIN
 	#include <..\bin\variablesJS.au3>
+	#include <..\control\AI.au3>
 	#include <..\control\functionsJS.au3>
+	#include <SQLite.dll.au3>
 	#include <..\SQLite\SQLite.au3>
 	#include <..\SQLite\SQLite_Functions.au3>
 	#include <FileIncludesJS.au3>

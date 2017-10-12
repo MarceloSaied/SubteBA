@@ -1,12 +1,12 @@
-#region ===========================================================================
+#region ====INIT ===============================================================
 	Func _ConfigInitial()
-		ConsoleWrite('++ConfigDBInitial() = ' & @CRLF)
+;~ 		ConsoleWrite('++ConfigDBInitial() = ' & @CRLF)
 		_SQLite_down()
 ;~ 		_DBvarInit()
 		; -------check if SQLIte SubteBA db exist
 		SQLite_init()
-	;~ 	$SQLq = "SELECT name FROM sqlite_temp_master WHERE type='table';"
-	;~ 	_SQLITErun($SQLq, $dbfile, $quietSQLQuery)
+		$SQLq = "SELECT name FROM sqlite_temp_master WHERE type='table';"
+		_SQLITErun($SQLq, $dbfile, $quietSQLQuery)
 	;~ 	;-------- Init Log
 	;~ 	_initLog()
 		;------------------------------------------------------------------------------
@@ -52,7 +52,7 @@
 	EndFunc
 #endregion
 #region  ==== send messages =======================================================================
-	Func SendTelegramMessages($TweetArr)
+	Func SendTelegramMessages111($TweetArr)
 		If IsArray($TweetArr) Then
 			$U = UBound($TweetArr) - 1
 			For $i = $u To 1 Step -1
@@ -60,6 +60,7 @@
 			Next
 			Exit 30
 		Else
+			Exit 21
 			Exit 21
 		EndIf
 	EndFunc
@@ -129,13 +130,17 @@
 		endif
 	EndFunc
 #endregion
-#region  ==== Tweeter handeling ===================================================================
+#region  ==== Tweeter scrapping ===================================================================
 	func _ScrapTweetMessages($Username)
 		Local $sData = InetRead("https://twitter.com/"&$Username)
 		Local $nBytesRead = @extended
-		ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $nBytesRead = ' & $nBytesRead & @CRLF)
+		ConsoleWrite('@@ BytesRead = ' & $nBytesRead &"   ")
 		$htmltxt = BinaryToString($sData)
-		If $nBytesRead < 100 Then	Exit 25
+		If $nBytesRead < 100000 or StringInStr($htmltxt,"subteba")<1 Then
+			ConsoleWrite('  Connection issue contacting  ' & "https://twitter.com/"&$Username& @crlf)
+			$htmltxt=""
+			Return $htmltxt
+		endif
 		return $htmltxt
 	EndFunc
 	Func _gettweetArr($htmltxt)
@@ -160,30 +165,100 @@
 	EndFunc
 #endregion
 #region  ==== Bot Messages handeling ===================================================================
+	Func Get_BotOffSet()
+;~ 		ConsoleWrite('++Get_BotOffSet() = '& @crlf)
+		if NOT FileExists($OffsetFile) then
+			$fileh = FileOpen($OffsetFile,1+8)
+			If $fileh = -1 Then
+				ConsoleWrite('   "Unable to open file 1.' & $OffsetFile )
+				return 0
+			endif
+			FileClose($fileh)
+		EndIf
+		$fileh = FileOpen($OffsetFile,0)
+		If $fileh = -1 Then
+			ConsoleWrite('   "Unable to open file 2.' & $OffsetFile )
+			return 0
+		endif
+		Local $offset = FileReadLine($fileh)
+		if @error = -1 Then
+			FileClose($fileh)
+			return 0
+		endif
+		ConsoleWrite("Get OffSet:"& $offset)
+		FileClose($fileh)
+		return $offset
+	EndFunc
+	Func Set_BotOffSet($offset)
+;~ 		ConsoleWrite('++Set_BotOffSet() = '&$offset& @crlf)
+		if NOT FileExists($OffsetFile) then
+			$fileh = FileOpen($OffsetFile,1+8)
+			If $fileh = -1 Then
+				ConsoleWrite('   "Unable to open file 3.' & $OffsetFile )
+				return 0
+			endif
+			FileClose($fileh)
+		EndIf
+		$fileh = FileOpen($OffsetFile,2)
+		If $fileh = -1 Then
+			ConsoleWrite('   "Unable to open file 4.' & $OffsetFile )
+			return 0
+		endif
+		FileWriteLine($fileh,$offset)
+		if @error = -1 Then
+			FileClose($fileh)
+			return 0
+		endif
+		ConsoleWrite("    Set OffSet:"& $offset &@crlf)
+		FileClose($fileh)
+		return 1
+	EndFunc
 	func UpdateUsers()
-		ConsoleWrite('  Update users ' & @crlf)
+		ConsoleWrite('  '&@HOUR & ':' & @MIN&'  Update users.  ' )
 		local $s=GetBotUpdates()
 		if $s then
-			$oJSON = _OO_JSON_Init()
-			$jsonObj = $oJSON.parse($s)
-			if $jsonObj.ok  then
-				if $jsonObj.jsonPath( "$.result").stringify() = "[[]]" then
-					ConsoleWrite(' No Bot data ' & @crlf)
-				Else
-					$UserIDArr = StripIntJS($jsonObj.jsonPath( "$.result..message.from.id").stringify())
-					$FnameArr = StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())
-					$LnameArr = StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
-					$epochArr = StripIntJS($jsonObj.jsonPath( "$.result..message.date").stringify())
-					for $i=1 to $UserIDArr[0]
-						SQLregister($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i])
-					next
+			$s=ParseForUserUpdate($s)
+			if $s then
+				$oJSON = _OO_JSON_Init()
+				$jsonObj = $oJSON.parse($s)
+				if $jsonObj.ok  then
+					if $jsonObj.jsonPath( "$.result").stringify() = "[[]]" then
+						ConsoleWrite(' No Bot data ' & @crlf)
+					Else
+						ConsoleWrite('  Updating... ' & @crlf)
+						$UpdateIDArr = StripIntJS($jsonObj.jsonPath( "$.result..update_id").stringify()  )
+						$UserIDArr =   StripIntJS($jsonObj.jsonPath( "$.result..message.from.id").stringify())
+						$FnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())
+						$LnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
+						$epochArr =    StripIntJS($jsonObj.jsonPath( "$.result..message.date").stringify())
+						$menssageArr = StripStrJS($jsonObj.jsonPath( "$.result..message.text").stringify())
+						if  $UserIDArr[0] = $UpdateIDArr[0] AND $UserIDArr[0] = $FnameArr[0] AND $UserIDArr[0] = $LnameArr[0]  AND $UserIDArr[0] = $epochArr[0]  AND $UserIDArr[0] = $menssageArr[0] then
+							$retBad=0
+							for $i=1 to $UserIDArr[0]
+								$ret=SQLregister($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i])
+								if Not $ret then	$retBad+=1
+								$UpdateID=$UpdateIDArr[$i]
+							next
+							if $retBad=0 then Set_BotOffSet($UpdateID+1)
+						Else
+							_printFromArray($UserIDArr)
+							_printFromArray($FnameArr)
+							_printFromArray($LnameArr)
+							_printFromArray($epochArr)
+							_printFromArray($menssageArr)
+							ConsoleWrite('  Error in JS array . exiting..... ' & @crlf)
+							exit 29
+						endif
+					endif
 				endif
 			endif
 		endif
 	EndFunc
 	Func GetBotUpdates()
-		$urlMSG="https://api.telegram.org/" & $token & "/getUpdates"
+		$offset=Get_BotOffSet()
+		$urlMSG="https://api.telegram.org/" & $token & "/getUpdates?offset="&$offset
 		$sGet = HttpGetJson($urlMSG)
+		ConsoleWrite('@@(' & @ScriptLineNumber & ') : $sGet = ' & $sGet & @crlf )
 		if $sGet<>"" then
 			return $sGet
 		Else
@@ -210,20 +285,48 @@
 		$stArr=StringSplit($st,":::",1)
 		return $stArr
 	EndFunc
-	Func SQLregister($UserID,$Fname,$Lname,$epoch)
-;~ 	ConsoleWrite('++SQLregister() = '& @crlf)
-		if SQLExistUser($UserID)=0 then
-			SQLInsertUser($UserID,$Fname,$Lname,$epoch)
-		endif
+	Func ParseForUserUpdate($s)
+;~ 		eliminate contact info
+		$s=StringRegExpReplace($s,'(?s)(?i)"contact":(.*?)}'  ,  '"text": ""' )
+;~ 		replace username last-name
+		$s=StringReplace($s,'"username":','"last_name":')
+		return $s
 	EndFunc
-	Func SQLInsertUser($UserID,$Fname,$Lname,$epoch)
-;~ 	ConsoleWrite('++SQLInsertUser() = '& @crlf)
+	Func SQLregister($UserID,$Fname,$Lname,$epoch,$mensage)
+;~ 	ConsoleWrite('++SQLregister() = '& @crlf)
+		$existUser=0
+		If SQLExistUser($UserID)=$userID then $existUser=1
+		if $existUser=0 then
+			$setactive=1
+			$ret=SQLInsertUser($UserID,$Fname,$Lname,$epoch,$setactive)
+			return $ret
+		endif
+		$setactive=-1
+		if AIMessage($mensage,"/START") then $setactive=1
+		if AIMessage($mensage,"/STOP") then $setactive=0
+		if $existUser=1 AND $setactive<>-1 then
+			$ret=SQLUpdateUserActive($UserID,$Fname,$Lname,$setactive)
+			return $ret
+		endif
+		return true
+	EndFunc
+	Func SQLInsertUser($UserID,$Fname,$Lname,$epoch,$active=1)
 		ConsoleWrite('  Nuevo usuario = '& $Fname & "  "  & $Lname  & @crlf)
-		$query='INSERT INTO Users VALUES (' & $UserID & ',"' & $Fname & '","' & $Lname & '",1,0,' & $epoch & ') ;'
+		$query='INSERT INTO Users VALUES (' & $UserID & ',"' & $Fname & '","' & $Lname & '",' & $active &',0,' & $epoch & ') ;'
 		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
 			return true
 		Else
 			MsgBox(48+4096,"Error inserting User ErrNo 1011" & @CRLF & $query,0,0)
+			Return false
+		EndIf
+	EndFunc
+	Func SQLUpdateUserActive($UserID,$Fname,$Lname,$active=1)
+		ConsoleWrite('    Usuario Activo 1/Start 0/Stop= '&$active& "  " & $Fname & "  "  & $Lname  & @crlf)
+		$query='UPDATE  Users SET Active=' & $active &' WHERE UserID='& $UserID & ' ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+			return true
+		Else
+			MsgBox(48+4096,"Error updating active user User ErrNo 1012" & @CRLF & $query,0,0)
 			Return false
 		EndIf
 	EndFunc
@@ -241,7 +344,6 @@
 	EndFunc
 #endregion
 #region   ===========================================================================
-
 	func closeall()
 		_SQLite_Close()
 		_SQLite_Shutdown()
@@ -290,4 +392,17 @@
 		ConsoleWrite('>> 	Output = ' & $sOutput & @crlf )
 		Return $sOutput
 	EndFunc   ;==>_GetDOSOutput
+	Func _timeBetween($cTime, $sTime, $eTime)
+		 If Not _DateIsValid('2000/01/01 ' & $cTime) Then Return -1
+		 If Not _DateIsValid('2000/01/01 ' & $sTime) Then Return -2
+		 If Not _DateIsValid('2000/01/01 ' & $eTime) Then Return -3
+		 ;~  ConsoleWrite(_DateDiff('s', '2000/01/01 ' & $cTime & ':00', '2000/01/01 ' & $sTime & ':00') & @CRLF)
+		 ;~  ConsoleWrite(_DateDiff('s', '2000/01/01 ' & $cTime & ':00', '2000/01/01 ' & $eTime & ':00') & @CRLF)
+		 If _DateDiff('s', '2000/01/01 ' & $cTime & ':00', '2000/01/01 ' & $sTime & ':00') < 0 And _
+			 _DateDiff('s', '2000/01/01 ' & $cTime & ':00', '2000/01/01 ' & $eTime & ':00') > 0 Then
+			  Return 1
+		 Else
+			  Return 0
+		 EndIf
+	EndFunc  ; ==>_timeBetween
 #endregion

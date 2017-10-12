@@ -5,9 +5,9 @@
 	global $FolderBin=$WorkingFolder&"\bin"
 	if NOT FileExists($FolderBin) then DirCreate($FolderBin)
 	if @Compiled then
-		global $token=IniRead("config.ini","bot","token","")
+		global $configPath="config.ini"
 	Else
-		global $token=IniRead("secret\config.ini","bot","token","")
+		global $configPath="secret\config.ini"
 	endif
 #endregion working files
 #region sqlite
@@ -20,11 +20,10 @@
 		global $sqliteDLLfile="System.Data.SQLite.32.2012.dll"
 		global $sSQliteDll =""
 		Global $EncryptDB=0
-
 	endfunc
 #endregion sqlite
-#region
-
+#region Configuration
+global $token=IniRead($configPath,"bot","token","")
 #endregion
 _DBvarInit()
 

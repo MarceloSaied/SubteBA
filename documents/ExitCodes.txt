@@ -33,5 +33,5 @@ functions
 26 Cant open recipients.txt (sendmessages)
 27
 28
-29
+29 error in JSON bot parsing . the lenght of arrays is odd
 30 SendTelegramMessages exited OK (functions.au3)
