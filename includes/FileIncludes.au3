@@ -3,8 +3,6 @@
 
 	if not @Compiled then
 		FileCopy("secret\"&$dbfile, $dbfullPath,0)
-				ConsoleWrite('@@ $dbfullPath = ' & $dbfullPath & @crlf )
-				ConsoleWrite('@@ $dbfile = ' & $dbfile & @crlf )
 		FileCopy("sqlite\System.Data.SQLite.32.2012.dll", $FolderBin&"\"&$sqliteDLLfile,0)
 	else
 ;~ 		FileInstall("secret\"&$dbfile, $dbfullPath, 0)
