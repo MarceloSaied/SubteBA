@@ -20,7 +20,7 @@
 
 	$SendToAll=0 ; si es 0 solo se manda a Dev users
 					  ; si es 1 se manda a todos
-
+	if @Compiled then $SendToAll=1
 
 	#include <includes\includes.au3>
 	_ConfigInitial()
@@ -31,34 +31,39 @@ while 1
 ;~ Get tweeter data , and send messages
 	If _timeBetween(@HOUR & ':' & @MIN, $StartTimeScrap, $EndTimeScrap) then
 		$htmltxt=_ScrapTweetMessages($Username)
-		$TweetArr = _gettweetArr($htmltxt)
-		if IsArray($TweetArr) then
-			$newMessagesFlag=0
-			For $i = 0 To UBound($TweetArr) -1
-				$TweetID = $TweetArr[$i][0]
-				$TweeMsg = $TweetArr[$i][1]
-				$TweeDate = $TweetArr[$i][2]
-				if not SQLExist_Message($TweetID) then
-					SQLInsertMessage($TweetID,$TweeMsg,$TweeDate)
-					sendmessages($TweeMsg)
-					$newMessagesFlag=1
-					ConsoleWrite('+ New messages ' & _NowTime(4) & "   ")
-				endif
-				sleep(2000)
-			Next
-			if $newMessagesFlag=0 then ConsoleWrite('  No new messages ' & _NowTime(4) & @CRLF)
+		if $htmltxt<>"" then
+			$TweetArr = _gettweetArr($htmltxt)
+			if IsArray($TweetArr) then
+				$newMessagesFlag=0
+				_ArraySort($TweetArr, 0, 0, 0, 2)
+				For $i = 0 To UBound($TweetArr) -1
+					$TweetID = $TweetArr[$i][0]
+					$TweeMsg = $TweetArr[$i][1]
+					$TweeDate = $TweetArr[$i][2]
+					if not SQLExist_Message($TweetID) then
+						SQLInsertMessage($TweetID,$TweeMsg,$TweeDate)
+						sendmessages($TweeMsg)
+						$newMessagesFlag=1
+						ConsoleWrite('+ New messages ' & _NowTime(4) & "   ")
+					endif
+					sleep(2000)
+				Next
+				if $newMessagesFlag=0 then ConsoleWrite('  No new messages ' & _NowTime(4) & @CRLF)
+			endif
 		endif
 	Else
-		ConsoleWrite('  Out of Scrap Time '& $StartTimeScrap & "  To "  & $EndTimeScrap & @CRLF)
+		ConsoleWrite(' Out of Scrap Time '& $StartTimeScrap & "  To "  & $EndTimeScrap & @CRLF)
 	endif
 
-	$minutes=5
-	ConsoleWrite('   sleeping '&$minutes& @CRLF)
-	sleep($minutes*60*1000)
-
+;~ 	$minutes=5
+;~ 	ConsoleWrite('   sleeping '&$minutes& @CRLF)
+;~ 	sleep($minutes*60*1000)
 	If _timeBetween(@HOUR & ':' & @MIN, $StartTimeBot, $EndTimeBot) then
 		UpdateUsers()
 	endif
+	$minutes=1
+	ConsoleWrite('   sleeping '&$minutes& " Min" & @CRLF)
+	sleep($minutes*60*1000)
 wend
 
 closeall()

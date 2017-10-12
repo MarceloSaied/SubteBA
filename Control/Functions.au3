@@ -61,6 +61,7 @@
 			Exit 30
 		Else
 			Exit 21
+			Exit 21
 		EndIf
 	EndFunc
 ;~  	Func sendmessages($message)  ;~ from file of recipients
@@ -135,7 +136,11 @@
 		Local $nBytesRead = @extended
 		ConsoleWrite('@@ BytesRead = ' & $nBytesRead &"   ")
 		$htmltxt = BinaryToString($sData)
-		If $nBytesRead < 100 Then	Exit 25
+		If $nBytesRead < 100000 or StringInStr($htmltxt,"subteba")<1 Then
+			ConsoleWrite('  Connection issue contacting  ' & "https://twitter.com/"&$Username& @crlf)
+			$htmltxt=""
+			Return $htmltxt
+		endif
 		return $htmltxt
 	EndFunc
 	Func _gettweetArr($htmltxt)
@@ -161,7 +166,7 @@
 #endregion
 #region  ==== Bot Messages handeling ===================================================================
 	Func Get_BotOffSet()
-		ConsoleWrite('++Get_BotOffSet() = '& @crlf)
+;~ 		ConsoleWrite('++Get_BotOffSet() = '& @crlf)
 		if NOT FileExists($OffsetFile) then
 			$fileh = FileOpen($OffsetFile,1+8)
 			If $fileh = -1 Then
@@ -185,7 +190,7 @@
 		return $offset
 	EndFunc
 	Func Set_BotOffSet($offset)
-		ConsoleWrite('++Set_BotOffSet() = '&$offset& @crlf)
+;~ 		ConsoleWrite('++Set_BotOffSet() = '&$offset& @crlf)
 		if NOT FileExists($OffsetFile) then
 			$fileh = FileOpen($OffsetFile,1+8)
 			If $fileh = -1 Then
@@ -194,7 +199,7 @@
 			endif
 			FileClose($fileh)
 		EndIf
-		$fileh = FileOpen($OffsetFile,1)
+		$fileh = FileOpen($OffsetFile,2)
 		If $fileh = -1 Then
 			ConsoleWrite('   "Unable to open file 4.' & $OffsetFile )
 			return 0
@@ -204,23 +209,23 @@
 			FileClose($fileh)
 			return 0
 		endif
-		ConsoleWrite("Set OffSet:"& $offset)
+		ConsoleWrite("    Set OffSet:"& $offset &@crlf)
 		FileClose($fileh)
 		return 1
 	EndFunc
 	func UpdateUsers()
-		ConsoleWrite('  Update users ' )
+		ConsoleWrite('  '&@HOUR & ':' & @MIN&'  Update users.  ' )
 		local $s=GetBotUpdates()
 		if $s then
 			$s=ParseForUserUpdate($s)
 			if $s then
-				ConsoleWrite('  Updating... ' & @crlf)
 				$oJSON = _OO_JSON_Init()
 				$jsonObj = $oJSON.parse($s)
 				if $jsonObj.ok  then
 					if $jsonObj.jsonPath( "$.result").stringify() = "[[]]" then
 						ConsoleWrite(' No Bot data ' & @crlf)
 					Else
+						ConsoleWrite('  Updating... ' & @crlf)
 						$UpdateIDArr = StripIntJS($jsonObj.jsonPath( "$.result..update_id").stringify()  )
 						$UserIDArr =   StripIntJS($jsonObj.jsonPath( "$.result..message.from.id").stringify())
 						$FnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())
@@ -231,13 +236,10 @@
 							$retBad=0
 							for $i=1 to $UserIDArr[0]
 								$ret=SQLregister($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i])
-								ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $ret = ' & $ret & @crlf )
 								if Not $ret then	$retBad+=1
-									ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $retBad = ' & $retBad & @crlf )
 								$UpdateID=$UpdateIDArr[$i]
 							next
-							if $retBad=0 then Set_BotOffSet($UpdateID)
-								ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $retBad = ' & $retBad & @crlf )
+							if $retBad=0 then Set_BotOffSet($UpdateID+1)
 						Else
 							_printFromArray($UserIDArr)
 							_printFromArray($FnameArr)
@@ -296,17 +298,16 @@
 		if $existUser=0 then
 			$setactive=1
 			$ret=SQLInsertUser($UserID,$Fname,$Lname,$epoch,$setactive)
-			ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $ret = ' & $ret & @crlf )
 			return $ret
 		endif
-		 $setactive=""
+		$setactive=-1
 		if AIMessage($mensage,"/START") then $setactive=1
 		if AIMessage($mensage,"/STOP") then $setactive=0
-		if $existUser=1 AND $setactive<>"" then
+		if $existUser=1 AND $setactive<>-1 then
 			$ret=SQLUpdateUserActive($UserID,$Fname,$Lname,$setactive)
-			ConsoleWrite('@@(' & @ScriptName & '-' & @ScriptLineNumber & ') : $ret = ' & $ret & @crlf )
 			return $ret
 		endif
+		return true
 	EndFunc
 	Func SQLInsertUser($UserID,$Fname,$Lname,$epoch,$active=1)
 		ConsoleWrite('  Nuevo usuario = '& $Fname & "  "  & $Lname  & @crlf)
@@ -319,7 +320,7 @@
 		EndIf
 	EndFunc
 	Func SQLUpdateUserActive($UserID,$Fname,$Lname,$active=1)
-		ConsoleWrite('  Usuario Activo = '& $Fname & "  "  & $Lname  & @crlf)
+		ConsoleWrite('    Usuario Activo 1/Start 0/Stop= '&$active& "  " & $Fname & "  "  & $Lname  & "   ")
 		$query='UPDATE  Users SET Active=' & $active &' WHERE UserID='& $UserID & ' ;'
 		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
 			return true
