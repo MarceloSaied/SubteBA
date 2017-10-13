@@ -257,7 +257,7 @@
 	Func GetBotUpdates()
 		$offset=Get_BotOffSet()
 		$urlMSG="https://api.telegram.org/" & $token & "/getUpdates?offset="&$offset
-		$sGet = HttpGetJson($urlMSG)
+		$sGet = HttpGetJson1($urlMSG)
 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : $sGet = ' & $sGet & @crlf )
 		if $sGet<>"" then
 			return $sGet
