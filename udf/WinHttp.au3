@@ -41,3 +41,12 @@ Func HttpGetJson($sURL)
 	Return SetError(0, 0, $oHTTP.ResponseText)
 EndFunc
 
+Func HttpGetJson1($sURL)
+	$dData = InetRead($sURL,1)
+	If (@error) Then Return SetError(1, 0, 0)
+	Local $sData = BinaryToString($dData)
+;~ 	ConsoleWrite('++ HttpGetJson1= '&$sData& @crlf)
+	Return $sData
+EndFunc
+
+
