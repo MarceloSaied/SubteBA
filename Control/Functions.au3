@@ -98,7 +98,7 @@
 ;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : TelegramSTOPMessage = ' & $respuesta & @crlf )
 	EndFunc
 	Func TelegramSTARTMessage($UserID)
-		$message ="Los mensajes de alertas han sido deshabilitados" & $nuevaLinea
+		$message ="Los mensajes de alertas han sido habilitados" & $nuevaLinea
 		$message&='/STOP-> Para deshabilitar la recepcion de alertas'  & $nuevaLinea
 		$message&='INFO -> para mas informacion.'  & $nuevaLinea
 
