@@ -232,7 +232,7 @@
 		return $offset
 	EndFunc
 	Func Set_BotOffSet($offset)
-;~ 		ConsoleWrite('++Set_BotOffSet() = '&$offset& @crlf)
+		ConsoleWrite('++Set_BotOffSet() = '&$offset& @crlf)
 		if NOT FileExists($OffsetFile) then
 			$fileh = FileOpen($OffsetFile,1+8)
 			If $fileh = -1 Then
@@ -260,6 +260,7 @@
 		local $s=GetBotUpdates()
 		if $s then
 			$s=ParseForUserUpdate($s)
+			ConsoleWrite('@@(' & @ScriptLineNumber & ') : $s = ' & $s & @crlf )
 			if $s then
 				$oJSON = _OO_JSON_Init()
 				$jsonObj = $oJSON.parse($s)
@@ -302,7 +303,7 @@
 		$offset=Get_BotOffSet()
 		$urlMSG="https://api.telegram.org/" & $token & "/getUpdates?offset="&$offset
 		$sGet = HttpGetJson1($urlMSG)
-		ConsoleWrite('@@ $sGet = ' & $sGet & @crlf )
+;~ 		ConsoleWrite('@@ $sGet = ' & $sGet & @crlf )
 		if $sGet<>"" then
 			return $sGet
 		Else
@@ -342,7 +343,6 @@
 	EndFunc
 	Func SQLregister($UserID,$Fname,$Lname,$epoch,$mensage)
 ;~ 	ConsoleWrite('++SQLregister() = '& @crlf)
-
 		$existUser=0
 		If SQLExistUser($UserID)=$userID then $existUser=1
 		if $existUser=0 then
