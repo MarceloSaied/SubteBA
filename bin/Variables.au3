@@ -23,6 +23,7 @@
 		Global $EncryptDB=0
 	endfunc
 #endregion sqlite
+$nuevaLinea="%0A"
 #region Tweeter reads
 	global $token=IniRead($configPath,"bot","token","")
 	global $StartTimeScrap=IniRead($configPath,"Times","StartTimeScrapHH:MM","00:00")

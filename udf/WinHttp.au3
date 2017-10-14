@@ -20,8 +20,9 @@ Func HttpGet($sURL, $sData = "")
 	$oHTTP.Send()
 	If (@error) Then Return SetError(2, 0, 0)
 	IF $oHTTP.Status="400" THEN
-		ConsoleWrite('@@$ HttpGet oHTTP.Status='&$oHTTP.Status & @crlf )
-		ConsoleWrite('@@$oHTTP.ResponseText = ' & $oHTTP.ResponseText & @crlf )
+		ConsoleWrite('@@(' & @ScriptLineNumber & ') : HttpGet oHTTP.Status='&$oHTTP.Status & @crlf )
+		ConsoleWrite('@@(' & @ScriptLineNumber & ') : oHTTP.ResponseText = ' & $oHTTP.ResponseText & @crlf )
+		ConsoleWrite('@@(' & @ScriptLineNumber & ') : $sURL = ' & $sURL & @crlf )
 	ENDIF
 	If ($oHTTP.Status <> $HTTP_STATUS_OK) Then Return SetError(3, 0, 0)
 	Return SetError(0, 0, $oHTTP.ResponseText)
