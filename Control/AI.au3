@@ -7,17 +7,17 @@ Func AImessage($msg,$word)
 		return 0
 	endif
 EndFunc
-Func ParseBotMessage()
+Func ParseBotMessage($UserID,$Fname,$Lname,$epoch,$mensage)
 ;~ 	ConsoleWrite('++ParseBotMessage() = '& @crlf)
+	if AIMessage($mensage,"/START") then return true
+	if AIMessage($mensage,"/STOP") then return true
 	if AIMessage($mensage,"info") or AIMessage($mensage,"informacion")  or AIMessage($mensage,"/INFO") or AIMessage($mensage,"help") then
 		$ret=TelegramInitialMessage($UserID)
 		if $ret=0 then return true
 		return false
 	endif
 
-
-
-	$ret=TelegramBaseMessage($UserID)
+	$ret=TelegramBaseMessage($UserID,$mensage)
 	if $ret=0 then return true
 	return false
 EndFunc
