@@ -180,6 +180,30 @@
 
 #endregion
 #region  ==== Tweeter scrapping ===================================================================
+	Func TweeterMessages($Username)
+		ConsoleWrite('++TweeterMessages() = '& $Username &@crlf)
+		$htmltxt=_ScrapTweetMessages($Username)
+		if $htmltxt<>"" then
+			$TweetArr = _gettweetArr($htmltxt)
+			if IsArray($TweetArr) then
+				$newMessagesFlag=0
+				_ArraySort($TweetArr, 0, 0, 0, 2)
+				For $i = 0 To UBound($TweetArr) -1
+					$TweetID = $TweetArr[$i][0]
+					$TweeMsg = $TweetArr[$i][1]
+					$TweeDate = $TweetArr[$i][2]
+					if not SQLExist_Message($TweetID) then
+						SQLInsertMessage($TweetID,$TweeMsg,$TweeDate)
+						sendmessages($TweeMsg)
+						$newMessagesFlag=1
+						ConsoleWrite('+ New messages ' & _NowTime(4) & "   ")
+					endif
+					sleep(2000)
+				Next
+				if $newMessagesFlag=0 then ConsoleWrite('  No new messages ' & _NowTime(4) & @CRLF)
+			endif
+		endif
+	EndFunc
 	func _ScrapTweetMessages($Username)
 		Local $sData = InetRead("https://twitter.com/"&$Username)
 		Local $nBytesRead = @extended
@@ -267,7 +291,7 @@
 		local $s=GetBotUpdates()
 		if $s then
 			$s=ParseForUserUpdate($s)
-			ConsoleWrite('@@(' & @ScriptLineNumber & ') : $s = ' & $s & @crlf )
+			ConsoleWrite('@@ $s = ' & $s & @crlf )
 			if $s then
 				$oJSON = _OO_JSON_Init()
 				$jsonObj = $oJSON.parse($s)
@@ -286,8 +310,8 @@
 							$retBad=0
 							for $i=1 to $UserIDArr[0]
 								$ret=SQLregister($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i])
-								$ret1=ParseBotMessage()
-								ConsoleWrite('@@(' & @ScriptLineNumber & ') : $ret1 = ' & $ret1 & @crlf )
+								$ret1=ParseBotMessage($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i])
+								ConsoleWrite('>> $ret1 = ' & $ret1 & @crlf )
 								if (Not $ret) or (Not $ret1)  then	$retBad+=1
 								$UpdateID=$UpdateIDArr[$i]
 							next
@@ -314,7 +338,7 @@
 		if $sGet<>"" then
 			return $sGet
 		Else
-			$s_text="Error getUpdates from Telegram = "
+			$s_text="  Error getUpdates from Telegram = "
 			ConsoleWrite('!! ' & $s_text & @crlf & "! " & $sGet)
 			return false
 		endif
@@ -338,10 +362,13 @@
 		return $stArr
 	EndFunc
 	Func ParseForUserUpdate($s)
-		if StringInStr($s,'"location":') Then
-			$s='{"ok":true,"result":[]}'
-			return $s
-		endif
+;~ 		if StringInStr($s,'"location":') Then
+;~ 			$s='{"ok":true,"result":[]}'
+;~ 			return $s
+;~ 		endif
+;~ 		eliminate location info
+;~ "location":{"latitude":-34.631010,"longitude":-58.469731}}
+		$s=StringRegExpReplace($s,'(?s)(?i)"location":{"latitude":(.*?),"longitude":(.*?)}'  ,  '"text": ""' )
 ;~ 		eliminate contact info
 		$s=StringRegExpReplace($s,'(?s)(?i)"contact":(.*?)}'  ,  '"text": ""' )
 ;~ 		replace username last-name
