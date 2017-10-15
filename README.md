@@ -125,3 +125,11 @@ alt="SubteBA Logo" height="100" width="200">
 ### Desarrollo y aportes
 
 * Marcelo Saied
+
+### Especial Tanks to the AutoIT developpers , and The UDF creators
+	* [Melba23](https://www.autoitscript.com/forum/profile/38576-melba23/)
+	* [LinkOut](https://www.autoitscript.com/forum/profile/101631-linkout/)
+		* Telegram Bot UDF
+	* [TheDcoder](https://www.autoitscript.com/forum/profile/89462-thedcoder/)
+	* [Jos](https://www.autoitscript.com/forum/profile/19-jos/)
+	* 
