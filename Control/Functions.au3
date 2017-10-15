@@ -1,5 +1,6 @@
 #region ====INIT ===============================================================
 	Func _ConfigInitial()
+
 ;~ 		ConsoleWrite('++ConfigDBInitial() = ' & @CRLF)
 		_SQLite_down()
 ;~ 		_DBvarInit()
@@ -76,13 +77,17 @@
 		$message&='Este canal no es official del subte de Buenos Aires Ni de Metrovias.'  & $nuevaLinea
 		$message&= $nuevaLinea
 		$message&='Commandos:'  & $nuevaLinea
-		$message&='/INFO -> Muestra este mensage'  & $nuevaLinea
 		$message&='/START -> Activa la recepcion de alertas. '  & $nuevaLinea
 		$message&='/STOP  -> Desactiva la recepcion de alertas. '  & $nuevaLinea
+		$message&='/INFO -> Muestra este mensage'  & $nuevaLinea
 		$message&= $nuevaLinea
-		$message&='Futuros Commandos:'  & $nuevaLinea
-		$message&='/Solo A  -> Solo recepcion de alertas de la Linea A, B (C, D, E, H, P.'  & $nuevaLinea
-		$message&='/P propuesta -> Enviar propuestas'  & $nuevaLinea
+		$message&='Futuros Comandos:'  & $nuevaLinea
+		$message&='/ACTIVAR A B -> Recepcion de alertas de la Linea A, B (C, D, E, H, P, U)'  & $nuevaLinea
+		$message&='/DESACTIVAR A B -> Recepcion de alertas de la Linea A, B (C, D, E, H, P, U)'  & $nuevaLinea
+		$message&='/ESTACIONES A -> lista de estaciones de la linea A( B, C, D, E, H, P, U)'  & $nuevaLinea
+		$message&='/HORARIOS  -> Horarios de actividad'  & $nuevaLinea
+		$message&='/MAPA  -> Mapa de lineas de subte'  & $nuevaLinea
+		$message&='/PROPUESTA propuesta -> Enviar propuestas'  & $nuevaLinea
 
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
@@ -115,10 +120,11 @@
 		return $respuesta
 ;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : TelegramErrorMessage = ' & $respuesta & @crlf )
 	EndFunc
-	Func TelegramBaseMessage($UserID)
-		$message ="No logro entender el mensaje." & $nuevaLinea
+	Func TelegramBaseMessage($UserID,$USRmsg)
+		$message ="No logro entender el mensaje."
 		$message&='Reintente enviar el comando nuevamente.'  & $nuevaLinea
-		$message&='INFO -> para mas informacion.'  & $nuevaLinea
+		$message&='INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
+		$message&="Su mensage:" & $nuevaLinea & $USRmsg
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
 ;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : TelegramErrorMessage = ' & $respuesta & @crlf )
@@ -156,9 +162,10 @@
 		endif
 		Return false
 	EndFunc   ;==>_sendmessages
-	Func SendTelegramexec($chatid,$msgtext="testeo harcoded")
+	Func SendTelegramexec($chatid,$msgtext="testeo harcoded",$DisableNotification=True)
 		$urlMSG="https://api.telegram.org/" & $token & "/sendMessage?chat_id=" & $chatid & _
 		"&text=" & $msgtext & "&parse_mode=HTML"
+		If $DisableNotification = True Then $urlMSG &= "&disable_notification=True"
 		$sGet = HttpGet($urlMSG)
 
 		if $sget<>"0"  then
