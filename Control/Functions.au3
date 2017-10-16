@@ -324,14 +324,23 @@
 						$LnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
 						$epochArr =    StripIntJS($jsonObj.jsonPath( "$.result..message.date").stringify())
 						$menssageArr = StripStrJS($jsonObj.jsonPath( "$.result..message.text").stringify())
-						if  $UserIDArr[0] = $UpdateIDArr[0] AND $UserIDArr[0] = $FnameArr[0] AND $UserIDArr[0] = $LnameArr[0]  AND $UserIDArr[0] = $epochArr[0]  AND $UserIDArr[0] = $menssageArr[0] then
+						$IsBot = StripStrJS($jsonObj.jsonPath( "$.result..message.from.is_bot").stringify())
+						if  $UserIDArr[0] = $UpdateIDArr[0] AND $UserIDArr[0] = $FnameArr[0] AND _
+							$UserIDArr[0] = $LnameArr[0]  AND $UserIDArr[0] = $epochArr[0]  AND _
+							$UserIDArr[0] = $menssageArr[0] AND  $UserIDArr[0] = $IsBot[0]  then
 							$retBad=0
 							for $i=1 to $UserIDArr[0]
-								$ret=SQLregister($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i])
-								$ret1=ParseBotMessage($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i])
-								ConsoleWrite('>> $ret1 = ' & $ret1 & @crlf )
-								if (Not $ret) or (Not $ret1)  then	$retBad+=1
-								$UpdateID=$UpdateIDArr[$i]
+								if $IsBot[$i] <> "true" then
+									$ret=SQLregister($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i])
+									$ret1=ParseBotMessage($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i],$UpdateIDArr[$i])
+									ConsoleWrite('>> $ret1 = ' & $ret1 & @crlf )
+									if (Not $ret) or (Not $ret1)  then	$retBad+=1
+									$UpdateID=$UpdateIDArr[$i]
+								Else
+									ConsoleWrite('+(' & @ScriptLineNumber & ') : $menssageArr[$i] = ' & $menssageArr[$i] & @crlf )
+									ConsoleWrite('+(' & @ScriptLineNumber & ') : $IsBot[$i] = ' & $IsBot[$i] & @crlf )
+									$retBad=1
+								endif
 							next
 							if $retBad=0 then Set_BotOffSet($UpdateID+1)
 						Else
