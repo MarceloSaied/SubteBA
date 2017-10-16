@@ -349,11 +349,13 @@
 							next
 							if $retBad=0 then Set_BotOffSet($UpdateID+1)
 						Else
-							_printFromArray($UserIDArr)
-							_printFromArray($FnameArr)
-							_printFromArray($LnameArr)
-							_printFromArray($epochArr)
-							_printFromArray($menssageArr)
+							_printFromArray($UserIDArr,"UserIDArr")
+							_printFromArray($FnameArr,"FnameArr")
+							_printFromArray($LnameArr,"LnameArr")
+							_printFromArray($epochArr,"epochArr")
+							_printFromArray($menssageArr,"menssageArr")
+							_printFromArray($UpdateIDArr,"UpdateIDArr")
+							_printFromArray($IsBot,"IsBot")
 							ConsoleWrite('  Error in JS array . exiting..... ' & @crlf)
 							exit 29
 						endif
