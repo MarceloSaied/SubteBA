@@ -205,9 +205,14 @@
 					$TweeDate = $TweetArr[$i][2]
 					if not SQLExist_Message($TweetID) then
 						SQLInsertMessage($TweetID,$TweeMsg,$TweeDate)
-						sendmessages($TweeMsg)
-						$newMessagesFlag=1
-						ConsoleWrite('+ New messages ' & _NowTime(4) & "   ")
+						$TweetMinOld= (_GetUnixTime() - $TweeDate)/60
+						if $TweetMinOld < 60 then
+							sendmessages($TweeMsg)
+							$newMessagesFlag=1
+							ConsoleWrite('+ New messages ' & _NowTime(4) & "   ")
+						Else
+							ConsoleWrite('+ Old messages ' & $TweetMinOld & "   ")
+						endif
 					endif
 					sleep(2000)
 				Next
