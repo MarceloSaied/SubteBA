@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=SubteBA Telegram Alerter
 #AutoIt3Wrapper_Res_Description=SubteBA Telegram Alerter
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.40
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.50
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_LegalCopyright=By Marcelo Saied
 #AutoIt3Wrapper_Run_Obfuscator=y
@@ -39,17 +39,22 @@ while 1
 		ConsoleWrite(' Out of Scrap Time '& $StartTimeScrap & "  To "  & $EndTimeScrap & @CRLF)
 	endif
 
-	while ($TweeterScrapMsec - TimerDiff($beginScrap)) > 0
-;~ 		ConsoleWrite('>>        TweeterScrapMsec = ' & $TweeterScrapMsec & " > "& TimerDiff($beginScrap)&@crlf )
-		$beginGetUpdates = TimerInit()
-		If _timeBetween(@HOUR & ':' & @MIN, $StartTimeBot, $EndTimeBot) then
-			UpdateUsers()
-		endif
-		while $GetUpdateTimemsec > TimerDiff($beginGetUpdates)
-;~ 			ConsoleWrite('@@GetUpdateTimemsec = ' & $GetUpdateTimemsec & " > "& TimerDiff($beginGetUpdates)&@crlf )
-			Sleep(100)
+	$getBot=0
+	if $getBot then
+		while ($TweeterScrapMsec - TimerDiff($beginScrap)) > 0
+			$beginGetUpdates = TimerInit()
+			If _timeBetween(@HOUR & ':' & @MIN, $StartTimeBot, $EndTimeBot) then
+				UpdateUsers()
+			endif
+			while $GetUpdateTimemsec > TimerDiff($beginGetUpdates)
+				Sleep(100)
+			wend
 		wend
-	wend
+	Else
+		while ($TweeterScrapMsec - TimerDiff($beginScrap)) > 0
+			Sleep(1000)
+		wend
+	endif
 wend
 
 closeall()
