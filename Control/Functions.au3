@@ -24,6 +24,17 @@
 			Return false
 		EndIf
 	EndFunc
+	Func SQLInsertUserMessage($TweetID,$TweeMsg,$UserID,$Fname,$Lname,$TweeDate)
+;~ 		ConsoleWrite('++InsertMessageSQL() = '& @crlf)
+		$query='INSERT INTO UserMessages VALUES (' & $TweetID & ',"' & _
+		$TweeMsg & '" ,' & $UserID & ',"' & $Fname &"_"& $Lname & '",' & $TweeDate & ') ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+			return true
+		Else
+			MsgBox(48+4096,"Error inserting mesages ErrNo 1010" & @CRLF & $query,0,0)
+			Return false
+		EndIf
+	EndFunc
 	Func SQLGetUsers()
 ;~ 		ConsoleWrite('++SQLGetUsers() = '& @crlf)
 		$query='SELECT * FROM Users ;'
@@ -120,12 +131,13 @@
 		return $respuesta
 ;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : TelegramErrorMessage = ' & $respuesta & @crlf )
 	EndFunc
-	Func TelegramBaseMessage($UserID,$USRmsg)
+	Func TelegramBaseMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
 		$message ="No logro entender el mensaje."
 		$message&='Reintente enviar el comando nuevamente.'  & $nuevaLinea
 		$message&='INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
 		$message&="Su mensage:" & $nuevaLinea & $USRmsg
 		$respuesta = SendTelegramexec($UserID,$message)
+		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
 		return $respuesta
 ;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : TelegramErrorMessage = ' & $respuesta & @crlf )
 	EndFunc
@@ -177,7 +189,6 @@
 			return 1
 		endif
 	EndFunc
-
 #endregion
 #region  ==== Tweeter scrapping ===================================================================
 	Func TweeterMessages($Username)

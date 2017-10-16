@@ -7,7 +7,7 @@ Func AImessage($msg,$word)
 		return 0
 	endif
 EndFunc
-Func ParseBotMessage($UserID,$Fname,$Lname,$epoch,$mensage)
+Func ParseBotMessage($UserID,$Fname,$Lname,$epoch,$mensage,$TweetID)
 ;~ 	ConsoleWrite('++ParseBotMessage() = '& @crlf)
 	if AIMessage($mensage,"/START") then return true
 	if AIMessage($mensage,"/STOP") then return true
@@ -17,7 +17,7 @@ Func ParseBotMessage($UserID,$Fname,$Lname,$epoch,$mensage)
 		return false
 	endif
 
-	$ret=TelegramBaseMessage($UserID,$mensage)
+	$ret=TelegramBaseMessage($TweetID,$mensage,$UserID,$Fname,$Lname,$epoch)
 	if $ret=0 then return true
 	return false
 EndFunc
