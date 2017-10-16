@@ -135,7 +135,7 @@
 		$message ="No logro entender el mensaje."
 		$message&='Reintente enviar el comando nuevamente.'  & $nuevaLinea
 		$message&='INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
-		$message&="Su mensage:" & $nuevaLinea & $USRmsg
+;~ 		$message&="Su mensage:" & $nuevaLinea & $USRmsg
 		$respuesta = SendTelegramexec($UserID,$message)
 		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
 		return $respuesta
@@ -211,7 +211,7 @@
 							$newMessagesFlag=1
 							ConsoleWrite('+ New messages ' & _NowTime(4) & "   ")
 						Else
-							ConsoleWrite('+ Old messages ' & $TweetMinOld & "   ")
+							ConsoleWrite('+ Old messages ' & $TweetMinOld & @crlf)
 						endif
 					endif
 					sleep(2000)
@@ -260,7 +260,6 @@
 ;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : $res = ' & $res & @crlf )
 ;~ 		return $res
 ;~ 	EndFunc
-
 	Func Get_BotOffSet()
 ;~ 		ConsoleWrite('++Get_BotOffSet() = '& @crlf)
 		if NOT FileExists($OffsetFile) then
@@ -314,7 +313,7 @@
 		local $s=GetBotUpdates()
 		if $s then
 			$s=ParseForUserUpdate($s)
-			ConsoleWrite('@@ $s = ' & $s & @crlf )
+			ConsoleWrite('  $s = ' & $s & @crlf )
 			if $s then
 				$oJSON = _OO_JSON_Init()
 				$jsonObj = $oJSON.parse($s)
@@ -400,6 +399,7 @@
 ;~ 			$s='{"ok":true,"result":[]}'
 ;~ 			return $s
 ;~ 		endif
+
 ;~ 		eliminate location info
 ;~ "location":{"latitude":-34.631010,"longitude":-58.469731}}
 		$s=StringRegExpReplace($s,'(?s)(?i)"location":{"latitude":(.*?),"longitude":(.*?)}'  ,  '"text": ""' )
