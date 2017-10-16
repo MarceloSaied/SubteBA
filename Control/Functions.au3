@@ -329,9 +329,9 @@
 						$LnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
 						$epochArr =    StripIntJS($jsonObj.jsonPath( "$.result..message.date").stringify())
 						$menssageArr = StripStrJS($jsonObj.jsonPath( "$.result..message.text").stringify())
-						$IsBot = StripStrJS($jsonObj.jsonPath( "$.result..message.from.is_bot").stringify())
-						if  $UserIDArr[0] = $UpdateIDArr[0] AND $UserIDArr[0] = $FnameArr[0] AND _
-							$UserIDArr[0] = $LnameArr[0]  AND $UserIDArr[0] = $epochArr[0]  AND _
+						$IsBot =       StripIntJS($jsonObj.jsonPath( "$.result..message.from.is_bot").stringify())
+						if $UserIDArr[0] = $UpdateIDArr[0] AND  $UserIDArr[0] = $FnameArr[0] AND _
+							$UserIDArr[0] = $LnameArr[0]    AND  $UserIDArr[0] = $epochArr[0] AND _
 							$UserIDArr[0] = $menssageArr[0] AND  $UserIDArr[0] = $IsBot[0]  then
 							$retBad=0
 							for $i=1 to $UserIDArr[0]
@@ -405,6 +405,8 @@
 		$s=StringRegExpReplace($s,'(?s)(?i)"contact":(.*?)}'  ,  '"text": ""' )
 ;~ 		replace username last-name
 		$s=StringReplace($s,'"username":','"last_name":')
+;~ 		eliminate sticker info
+		$s=StringRegExpReplace($s,'(?s)(?i)"sticker":(.*?)}(.*?)}'  ,  '"text": ""' )
 		return $s
 	EndFunc
 	Func SQLregister($UserID,$Fname,$Lname,$epoch,$mensage)
