@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=SubteBA Telegram Alerter
 #AutoIt3Wrapper_Res_Description=SubteBA Telegram Alerter
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.27
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.39
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_LegalCopyright=By Marcelo Saied
 #AutoIt3Wrapper_Run_Obfuscator=y
@@ -28,20 +28,7 @@
 #endregion init
 local $Username=IniRead("..\..\secret\config.ini","Twitter","Username","subteba")
 
-#region testeos
-;~ 	ConsoleWrite("Test _SendMsg      -> "  & @TAB & _SendMsg($DEVChatID,"Testeo _SendMsg") & @CRLF)
-	$keybrd='[[Hello,Hello2]]'
-;~ 	$keybrd = '{"keyboard":[[{ text: "Yes" }],[{ text: "No" }]] }'
-;~ 	$keybrd = "[['top-left', 'top-right'],['bottom-left', 'bottom-right']]"
-;~ 	$keybrd='[[KeyboardButton(text="Yes"), KeyboardButton(text="No")]]'
-	ConsoleWrite("Test _SendMsg      -> "  & @TAB & _SendMsg($DEVChatID,"Test _SendMsg","HTML",$keybrd) & @CRLF)
 
-;~ 	$Path="images\workflow1.jpg"
-;~ 	$Caption="testeo de envio de imagen imagen"
-;~ 	$DEVChatID=464405525 ; gille
-;~ 	_SendPhoto($DEVChatID, $Path, $Caption)
-	exit
-#endregion
 while 1
 ;~ Get tweeter data , and send messages
 	$beginScrap = TimerInit()
