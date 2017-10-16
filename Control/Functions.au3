@@ -7,7 +7,7 @@
 		; -------check if SQLIte SubteBA db exist
 		SQLite_init()
 		$SQLq = "SELECT name FROM sqlite_temp_master WHERE type='table';"
-		_SQLITErun($SQLq, $dbfile, $quietSQLQuery)
+		_SQLITErun($SQLq, $dbfullPath, $quietSQLQuery)
 	;~ 	;-------- Init Log
 	;~ 	_initLog()
 		;------------------------------------------------------------------------------
