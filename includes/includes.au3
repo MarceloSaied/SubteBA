@@ -27,5 +27,4 @@
 	#include <..\SQLite\SQLite_Functions.au3>
 	#include <..\control\AI.au3>
 	#include <..\control\functions.au3>
-
 #endregion
