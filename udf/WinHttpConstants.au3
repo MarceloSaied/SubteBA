@@ -6,13 +6,13 @@
 
 #comments-start
 	Copyright 2013 Dragana R. <trancexx at yahoo dot com>
-	
+
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
 	You may obtain a copy of the License at
-	
+
 	http://www.apache.org/licenses/LICENSE-2.0
-	
+
 	Unless required by applicable law or agreed to in writing, software
 	distributed under the License is distributed on an "AS IS" BASIS,
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -133,8 +133,10 @@ Global Const $WINHTTP_OPTION_USERNAME = 0x1000
 Global Const $WINHTTP_OPTION_PASSWORD = 0x1001
 Global Const $WINHTTP_OPTION_PROXY_USERNAME = 0x1002
 Global Const $WINHTTP_OPTION_PROXY_PASSWORD = 0x1003
-
+Global Const $WINHTTP_OPTION_DECOMPRESSION = 118
 Global Const $WINHTTP_CONNS_PER_SERVER_UNLIMITED = 0xFFFFFFFF
+Global Const $WINHTTP_OPTION_UNSAFE_HEADER_PARSING = 110
+Global Const $WINHTTP_DECOMPRESSION_FLAG_ALL = 0x00000003
 
 Global Const $WINHTTP_AUTOLOGON_SECURITY_LEVEL_MEDIUM = 0
 Global Const $WINHTTP_AUTOLOGON_SECURITY_LEVEL_LOW = 1
@@ -216,7 +218,6 @@ Global Const $WINHTTP_ERROR_LAST = 12186
 ; WinHttp status codes  ;
 Global Const $HTTP_STATUS_CONTINUE = 100
 Global Const $HTTP_STATUS_SWITCH_PROTOCOLS = 101
-Global Const $HTTP_STATUS_OK = 200
 Global Const $HTTP_STATUS_CREATED = 201
 Global Const $HTTP_STATUS_ACCEPTED = 202
 Global Const $HTTP_STATUS_PARTIAL = 203
@@ -432,3 +433,6 @@ Global Const $WINHTTP_AUTOPROXY_RUN_INPROCESS = 0x00010000
 Global Const $WINHTTP_AUTOPROXY_RUN_OUTPROCESS_ONLY = 0x00020000
 Global Const $WINHTTP_AUTO_DETECT_TYPE_DHCP = 0x00000001
 Global Const $WINHTTP_AUTO_DETECT_TYPE_DNS_A = 0x00000002
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -17,13 +17,27 @@
 		global $quietSQLQuery = 1
 		global $dbfile ="SubteBA.db"
 		global $dbfullPath = $FolderResources & "\" & $dbfile
-		ConsoleWrite('@@'&@ScriptLineNumber&"  "&$dbfullPath & @crlf )
+		ConsoleWrite('<<    DataBase: '&$dbfullPath & @crlf )
 		global $sqliteDLLfile="System.Data.SQLite.32.2012.dll"
 		global $sSQliteDll =""
 		Global $EncryptDB=0
 	endfunc
 #endregion sqlite
+#region Send Telegram msg
+	$nuevaLinea="%0A"
+#endregion
+#region GetUpdates
+	$GetUpdateTimeSec=10
+	$TweeterScrapMin=5
+	ConsoleWrite('<<    Tweeter Scrap every Min ' & Sec2Time($TweeterScrapMin*60 ))
+	ConsoleWrite('  //  Telegram GetUpdates every Sec ' & Sec2Time($GetUpdateTimeSec) & @crlf )
+	$GetUpdateTimeMsec=$GetUpdateTimeSec*1000
+	$TweeterScrapMsec=$TweeterScrapMin*60*1000
+#endregion
 #region Tweeter reads
+	global $DEVChatID = IniRead($configPath,"dev","chatID","00000000")
+	$BOT_ID = IniRead($configPath,"botUDF","BotID","00000000")
+	$BotToken = IniRead($configPath,"botUDF","BotToken","00000000")
 	global $token=IniRead($configPath,"bot","token","")
 	global $StartTimeScrap=IniRead($configPath,"Times","StartTimeScrapHH:MM","00:00")
 	global $StartTimeBot=IniRead($configPath,"Times","StartTimeBotHH:MM","00:00")

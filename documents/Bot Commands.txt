@@ -1,0 +1,9 @@
+start - Activar todas las alertas
+stop - Pausar todas las alertas
+info - Informacion
+activar - letra/s de linea/s
+desactivar - letra/s de linea/s
+estaciones - letra de linea
+horarios - Horarios de actividad
+mapa - De las lineas de subte
+propuesta - Enviar una

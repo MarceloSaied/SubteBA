@@ -12,11 +12,14 @@
 	#include <IE.au3>
 #endregion UDF
 #region internal UDF
+	#include <../udf/WinHttpConstants.au3>
 	#include <../udf/WinHttp.au3>
+	#include <../udf/WinHttp1.au3>
 	#include <..\udf\CleanString.au3>
 	#include <..\udf\_epoch.au3>
 	#include <..\udf\OO_JSON.au3>
 	#include <..\udf\_PrintFromArray.au3>
+	#include <..\udf\Telegram UDF.au3>
 #endregion internal UDF
 #region BIN
 	#include <..\SQLite\SQLite.au3>

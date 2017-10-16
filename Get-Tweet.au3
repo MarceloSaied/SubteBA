@@ -6,9 +6,10 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=SubteBA Telegram Alerter
 #AutoIt3Wrapper_Res_Description=SubteBA Telegram Alerter
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.25
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.39
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_LegalCopyright=By Marcelo Saied
+#AutoIt3Wrapper_Run_Obfuscator=y
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #region init
 	#NoTrayIcon
@@ -25,45 +26,30 @@
 	#include <includes\includes.au3>
 	_ConfigInitial()
 #endregion init
-
 local $Username=IniRead("..\..\secret\config.ini","Twitter","Username","subteba")
+
+
 while 1
 ;~ Get tweeter data , and send messages
+	$beginScrap = TimerInit()
 	If _timeBetween(@HOUR & ':' & @MIN, $StartTimeScrap, $EndTimeScrap) then
-		$htmltxt=_ScrapTweetMessages($Username)
-		if $htmltxt<>"" then
-			$TweetArr = _gettweetArr($htmltxt)
-			if IsArray($TweetArr) then
-				$newMessagesFlag=0
-				_ArraySort($TweetArr, 0, 0, 0, 2)
-				For $i = 0 To UBound($TweetArr) -1
-					$TweetID = $TweetArr[$i][0]
-					$TweeMsg = $TweetArr[$i][1]
-					$TweeDate = $TweetArr[$i][2]
-					if not SQLExist_Message($TweetID) then
-						SQLInsertMessage($TweetID,$TweeMsg,$TweeDate)
-						sendmessages($TweeMsg)
-						$newMessagesFlag=1
-						ConsoleWrite('+ New messages ' & _NowTime(4) & "   ")
-					endif
-					sleep(2000)
-				Next
-				if $newMessagesFlag=0 then ConsoleWrite('  No new messages ' & _NowTime(4) & @CRLF)
-			endif
-		endif
+		TweeterMessages($Username)
+		consolewrite('>>   '&$Username&' Scrap time: '&Sec2Time(TimerDiff($beginScrap)/1000) & @crlf)
 	Else
 		ConsoleWrite(' Out of Scrap Time '& $StartTimeScrap & "  To "  & $EndTimeScrap & @CRLF)
 	endif
 
-;~ 	$minutes=5
-;~ 	ConsoleWrite('   sleeping '&$minutes& @CRLF)
-;~ 	sleep($minutes*60*1000)
-	If _timeBetween(@HOUR & ':' & @MIN, $StartTimeBot, $EndTimeBot) then
-		UpdateUsers()
-	endif
-	$minutes=5
-	ConsoleWrite('   sleeping '&$minutes& " Min" & @CRLF)
-	sleep($minutes*60*1000)
+	while ($TweeterScrapMsec - TimerDiff($beginScrap)) > 0
+;~ 		ConsoleWrite('>>        TweeterScrapMsec = ' & $TweeterScrapMsec & " > "& TimerDiff($beginScrap)&@crlf )
+		$beginGetUpdates = TimerInit()
+		If _timeBetween(@HOUR & ':' & @MIN, $StartTimeBot, $EndTimeBot) then
+			UpdateUsers()
+		endif
+		while $GetUpdateTimemsec > TimerDiff($beginGetUpdates)
+;~ 			ConsoleWrite('@@GetUpdateTimemsec = ' & $GetUpdateTimemsec & " > "& TimerDiff($beginGetUpdates)&@crlf )
+			Sleep(100)
+		wend
+	wend
 wend
 
 closeall()
