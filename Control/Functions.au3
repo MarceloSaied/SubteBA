@@ -249,6 +249,13 @@
 	EndFunc
 #endregion
 #region  ==== Bot Messages handeling ===================================================================
+;~ 	Func isbot($jsonObj)
+;~ 		ConsoleWrite('++isbot() = '& @crlf)
+;~ 		$res = StripStrJS($jsonObj.jsonPath( "$.result..message.from.is_bot").stringify())
+;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : $res = ' & $res & @crlf )
+;~ 		return $res
+;~ 	EndFunc
+
 	Func Get_BotOffSet()
 ;~ 		ConsoleWrite('++Get_BotOffSet() = '& @crlf)
 		if NOT FileExists($OffsetFile) then
