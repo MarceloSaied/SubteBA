@@ -1,7 +1,6 @@
 #include-once
+#IgnoreFunc __SQLite_Inline_Version, __SQLite_Inline_Modified
 
-#IgnoreFunc__SQLite_Inline_Modified
-#IgnoreFunc__SQLite_Inline_Version
 #include "Array.au3" 	; Using: _ArrayAdd(),_ArrayDelete(),_ArraySearch()
 #include "File.au3" 	; Using: _TempFile()
 
@@ -202,7 +201,7 @@ Global $__gaTempFiles_SQLite[1] = [''] ; Array of used Temp Files
 ; Modified.......: jpm
 ; Remarks .......: _SQLite_Startup([$sDll_Filename]) Loads SQLite3.dll
 ; ===============================================================================================================================
-Func _SQLite_Startup($sDll_Filename = "", $bUTF8ErrorMsg = False, $bForceLocal = 0, $sPrintCallback = $g_sPrintCallback_SQLite)
+Func _SQLite_Startup($sDll_Filename = "", $bUTF8ErrorMsg = False, $bForceLocal = 0, $sPrintCallback = "__SQLite_ConsoleWrite")
 	; The $sPrintCallback parameter may look strange to assign it to $g_sPrintCallback_SQLite as
 	; a default.  This is done so that $g_sPrintCallback_SQLite can be pre-initialized with the internal
 	; callback in a single place in case that callback changes.  If the user overrides it then
@@ -1354,9 +1353,9 @@ Func __SQLite_Print($sText)
 		If $g_bUTF8ErrorMsg_SQLite Then
 			; can be used when sending to application such SciTE configured with output.code.page=65001
 			Local $tStr8 = __SQLite_StringToUtf8Struct($sText)
-			Call($g_sPrintCallback_SQLite, DllStructGetData($tStr8, 1))
+			Call("__SQLite_ConsoleWrite", DllStructGetData($tStr8, 1))
 		Else
-			Call($g_sPrintCallback_SQLite, $sText)
+			Call("__SQLite_ConsoleWrite", $sText)
 		EndIf
 	EndIf
 EndFunc   ;==>__SQLite_Print
