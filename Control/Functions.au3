@@ -117,6 +117,12 @@
 		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
 		return $respuesta
 	EndFunc
+	Func TelegramInformNewUser($UserID,$Fname,$Lname)
+		$message ="Nunevo usuario:" & $nuevaLinea
+		$message&=$Fname & "  " & $Lname
+		$respuesta = SendTelegramexec($UserID,$message)
+		return $respuesta
+	EndFunc
 	Func ReformatMessage($message)
 ;~ 	ConsoleWrite('++ReformatMessage() = '& @crlf)
 		$msgArr=StringSplit($message,"Actualizado",1)
@@ -187,7 +193,7 @@
 							$newMessagesFlag=1
 							ConsoleWrite('+ New messages ' & _NowTime(4) & "   ")
 						Else
-							ConsoleWrite('+ Old messages ' & $TweetMinOld & @crlf)
+							ConsoleWrite('+ Old messages ' & Sec2Time($TweetMinOld*60) & @crlf)
 						endif
 					endif
 					sleep(2000)
@@ -278,7 +284,7 @@
 		return 1
 	EndFunc
 	func UpdateUsers()
-		ConsoleWrite('  '&@HOUR & ':' & @MIN&'  Update users.  ' )
+		ConsoleWrite('  '&@HOUR & ':' & @MIN&  ':' & @sec & '  Update users.  ' )
 		local $s=GetBotUpdates()
 		if $s then
 			$s=ParseForUserUpdate($s)
@@ -383,6 +389,7 @@
 			$setactive=1
 			$ret=SQLInsertUser($UserID,$Fname,$Lname,$epoch,$setactive)
 			if $ret then
+				TelegramInformNewUser($DEVChatID,$Fname,$Lname)
 				$ret=TelegramSTOPMessage($UserID)
 				if $ret=0 then return true
 			else
