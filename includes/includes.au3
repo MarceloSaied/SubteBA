@@ -9,7 +9,7 @@
 	#include <File.au3>
    #include <Constants.au3>
    #include <Date.au3>
-	#include <IE.au3>
+;~ 	#include <IE.au3>
 #endregion UDF
 #region internal UDF
 	#include <../udf/WinHttpConstants.au3>
@@ -27,5 +27,4 @@
 	#include <..\SQLite\SQLite_Functions.au3>
 	#include <..\control\AI.au3>
 	#include <..\control\functions.au3>
-
 #endregion

@@ -1,13 +1,12 @@
 #region ====INIT ===============================================================
 	Func _ConfigInitial()
-
 ;~ 		ConsoleWrite('++ConfigDBInitial() = ' & @CRLF)
 		_SQLite_down()
 ;~ 		_DBvarInit()
 		; -------check if SQLIte SubteBA db exist
 		SQLite_init()
 		$SQLq = "SELECT name FROM sqlite_temp_master WHERE type='table';"
-		_SQLITErun($SQLq, $dbfile, $quietSQLQuery)
+		_SQLITErun($SQLq, $dbfullPath, $quietSQLQuery)
 	;~ 	;-------- Init Log
 	;~ 	_initLog()
 		;------------------------------------------------------------------------------
@@ -64,24 +63,6 @@
 	EndFunc
 #endregion
 #region  ==== send messages =======================================================================
-;~  	Func sendmessages($message)  ;~ from file of recipients
-;~ 		Local $fileh = FileOpen("secret\recipients.txt", 0)
-;~ 		If $fileh = -1 Then
-;~ 			Exit 26
-;~ 		EndIf
-;~ 		While 1
-;~ 			Local $chatidLine = FileReadLine($fileh)
-;~ 			If @error = -1 Then ExitLoop
-;~ 			$chatidArr = StringSplit($chatidLine, ',')
-;~ 			$chatid = $chatidArr[1]
-;~ 			if $chatID<>"" then
-;~ 				ConsoleWrite('- $chatid = ' & $chatid & "  ->  " & $chatidArr[2] & @CRLF)
-;~ 				$respuesta = SendTelegramexec($chatid,$message)
-;~ 			$respuesta  0 is ok
-;~ 			endif
-;~ 		WEnd
-;~ 		FileClose($fileh)
-;~ 	EndFunc   ;==>_sendmessages
 	Func TelegramInitialMessage($UserID)
 ;~ 	ConsoleWrite('++TelegramInitialMessage() = '& @crlf)
 		$message ="SubteBA BOT , lee los informes de Subte BA en Twitter, y los manda por este canal. "
@@ -102,7 +83,6 @@
 
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
-;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : $respuestaInitialMessage = ' & $respuesta & @crlf )
 	EndFunc
 	Func TelegramSTOPMessage($UserID)
 		$message ="Los mensajes de alertas han sido deshabilitados" & $nuevaLinea
@@ -111,7 +91,6 @@
 
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
-;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : TelegramSTOPMessage = ' & $respuesta & @crlf )
 	EndFunc
 	Func TelegramSTARTMessage($UserID)
 		$message ="Los mensajes de alertas han sido habilitados" & $nuevaLinea
@@ -120,7 +99,6 @@
 
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
-;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : TelegramSTARTMessage = ' & $respuesta & @crlf )
 	EndFunc
 	Func TelegramErrorMessage($UserID)
 		$message ="No se ha registrado el cambio requerido." & $nuevaLinea
@@ -129,17 +107,21 @@
 
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
-;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : TelegramErrorMessage = ' & $respuesta & @crlf )
 	EndFunc
 	Func TelegramBaseMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
 		$message ="No logro entender el mensaje."
 		$message&='Reintente enviar el comando nuevamente.'  & $nuevaLinea
 		$message&='INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
-		$message&="Su mensage:" & $nuevaLinea & $USRmsg
+;~ 		$message&="Su mensage:" & $nuevaLinea & $USRmsg
 		$respuesta = SendTelegramexec($UserID,$message)
 		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
 		return $respuesta
-;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : TelegramErrorMessage = ' & $respuesta & @crlf )
+	EndFunc
+	Func TelegramInformNewUser($UserID,$Fname,$Lname)
+		$message ="Nunevo usuario:" & $nuevaLinea
+		$message&=$Fname & "  " & $Lname
+		$respuesta = SendTelegramexec($UserID,$message)
+		return $respuesta
 	EndFunc
 	Func ReformatMessage($message)
 ;~ 	ConsoleWrite('++ReformatMessage() = '& @crlf)
@@ -205,9 +187,14 @@
 					$TweeDate = $TweetArr[$i][2]
 					if not SQLExist_Message($TweetID) then
 						SQLInsertMessage($TweetID,$TweeMsg,$TweeDate)
-						sendmessages($TweeMsg)
-						$newMessagesFlag=1
-						ConsoleWrite('+ New messages ' & _NowTime(4) & "   ")
+						$TweetMinOld= (_GetUnixTime() - $TweeDate)/60
+						if $TweetMinOld < 60 then
+							sendmessages($TweeMsg)
+							$newMessagesFlag=1
+							ConsoleWrite('+ New messages ' & _NowTime(4) & "   ")
+						Else
+							ConsoleWrite('+ Old messages ' & Sec2Time($TweetMinOld*60) & @crlf)
+						endif
 					endif
 					sleep(2000)
 				Next
@@ -240,7 +227,6 @@
 			$TweetIDArr = StringRegExp($htmltxt, '(?s)(?i)data-tweet-id="(.*?)"', 3)
 			$TweetArrAux = _mergeArray($TweetIDArr, $TweetMSGArr)
 			$TweetArr = _mergeArray($TweetArrAux, $TweetDate)
-	;~ 		_ArrayDisplay($TweetArr)
 			return $TweetArr
 		Else
 			ConsoleWrite('!!!(' &  @ScriptLineNumber & ') : Error on  $MSGArr = ' & $MSGArr & @crlf )
@@ -249,13 +235,6 @@
 	EndFunc
 #endregion
 #region  ==== Bot Messages handeling ===================================================================
-;~ 	Func isbot($jsonObj)
-;~ 		ConsoleWrite('++isbot() = '& @crlf)
-;~ 		$res = StripStrJS($jsonObj.jsonPath( "$.result..message.from.is_bot").stringify())
-;~ 		ConsoleWrite('@@(' & @ScriptLineNumber & ') : $res = ' & $res & @crlf )
-;~ 		return $res
-;~ 	EndFunc
-
 	Func Get_BotOffSet()
 ;~ 		ConsoleWrite('++Get_BotOffSet() = '& @crlf)
 		if NOT FileExists($OffsetFile) then
@@ -305,11 +284,11 @@
 		return 1
 	EndFunc
 	func UpdateUsers()
-		ConsoleWrite('  '&@HOUR & ':' & @MIN&'  Update users.  ' )
+		ConsoleWrite('  '&@HOUR & ':' & @MIN&  ':' & @sec & '  Update users.  ' )
 		local $s=GetBotUpdates()
 		if $s then
 			$s=ParseForUserUpdate($s)
-			ConsoleWrite('@@ $s = ' & $s & @crlf )
+			ConsoleWrite('  $s = ' & $s & @crlf )
 			if $s then
 				$oJSON = _OO_JSON_Init()
 				$jsonObj = $oJSON.parse($s)
@@ -324,9 +303,9 @@
 						$LnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
 						$epochArr =    StripIntJS($jsonObj.jsonPath( "$.result..message.date").stringify())
 						$menssageArr = StripStrJS($jsonObj.jsonPath( "$.result..message.text").stringify())
-						$IsBot = StripStrJS($jsonObj.jsonPath( "$.result..message.from.is_bot").stringify())
-						if  $UserIDArr[0] = $UpdateIDArr[0] AND $UserIDArr[0] = $FnameArr[0] AND _
-							$UserIDArr[0] = $LnameArr[0]  AND $UserIDArr[0] = $epochArr[0]  AND _
+						$IsBot =       StripIntJS($jsonObj.jsonPath( "$.result..message.from.is_bot").stringify())
+						if $UserIDArr[0] = $UpdateIDArr[0] AND  $UserIDArr[0] = $FnameArr[0] AND _
+							$UserIDArr[0] = $LnameArr[0]    AND  $UserIDArr[0] = $epochArr[0] AND _
 							$UserIDArr[0] = $menssageArr[0] AND  $UserIDArr[0] = $IsBot[0]  then
 							$retBad=0
 							for $i=1 to $UserIDArr[0]
@@ -344,11 +323,13 @@
 							next
 							if $retBad=0 then Set_BotOffSet($UpdateID+1)
 						Else
-							_printFromArray($UserIDArr)
-							_printFromArray($FnameArr)
-							_printFromArray($LnameArr)
-							_printFromArray($epochArr)
-							_printFromArray($menssageArr)
+							_printFromArray($UserIDArr,"UserIDArr")
+							_printFromArray($FnameArr,"FnameArr")
+							_printFromArray($LnameArr,"LnameArr")
+							_printFromArray($epochArr,"epochArr")
+							_printFromArray($menssageArr,"menssageArr")
+							_printFromArray($UpdateIDArr,"UpdateIDArr")
+							_printFromArray($IsBot,"IsBot")
 							ConsoleWrite('  Error in JS array . exiting..... ' & @crlf)
 							exit 29
 						endif
@@ -389,10 +370,6 @@
 		return $stArr
 	EndFunc
 	Func ParseForUserUpdate($s)
-;~ 		if StringInStr($s,'"location":') Then
-;~ 			$s='{"ok":true,"result":[]}'
-;~ 			return $s
-;~ 		endif
 ;~ 		eliminate location info
 ;~ "location":{"latitude":-34.631010,"longitude":-58.469731}}
 		$s=StringRegExpReplace($s,'(?s)(?i)"location":{"latitude":(.*?),"longitude":(.*?)}'  ,  '"text": ""' )
@@ -400,6 +377,8 @@
 		$s=StringRegExpReplace($s,'(?s)(?i)"contact":(.*?)}'  ,  '"text": ""' )
 ;~ 		replace username last-name
 		$s=StringReplace($s,'"username":','"last_name":')
+;~ 		eliminate sticker info
+		$s=StringRegExpReplace($s,'(?s)(?i)"sticker":(.*?)}(.*?)}'  ,  '"text": ""' )
 		return $s
 	EndFunc
 	Func SQLregister($UserID,$Fname,$Lname,$epoch,$mensage)
@@ -410,6 +389,7 @@
 			$setactive=1
 			$ret=SQLInsertUser($UserID,$Fname,$Lname,$epoch,$setactive)
 			if $ret then
+				TelegramInformNewUser($DEVChatID,$Fname,$Lname)
 				$ret=TelegramSTOPMessage($UserID)
 				if $ret=0 then return true
 			else
@@ -486,7 +466,6 @@
 		For $i = 0 To $size - 1
 			$array1[$i][$newCol] = $array2[$i]
 		Next
-	;~   _ArrayDisplay($array1)
 		Return $array1
 	EndFunc   ;==>_mergeArray
 	Func _ArrayAdd_Column($Array)
@@ -524,8 +503,6 @@
 		 If Not _DateIsValid('2000/01/01 ' & $cTime) Then Return -1
 		 If Not _DateIsValid('2000/01/01 ' & $sTime) Then Return -2
 		 If Not _DateIsValid('2000/01/01 ' & $eTime) Then Return -3
-		 ;~  ConsoleWrite(_DateDiff('s', '2000/01/01 ' & $cTime & ':00', '2000/01/01 ' & $sTime & ':00') & @CRLF)
-		 ;~  ConsoleWrite(_DateDiff('s', '2000/01/01 ' & $cTime & ':00', '2000/01/01 ' & $eTime & ':00') & @CRLF)
 		 If _DateDiff('s', '2000/01/01 ' & $cTime & ':00', '2000/01/01 ' & $sTime & ':00') < 0 And _
 			 _DateDiff('s', '2000/01/01 ' & $cTime & ':00', '2000/01/01 ' & $eTime & ':00') > 0 Then
 			  Return 1
