@@ -25,7 +25,8 @@
 	endfunc
 #endregion sqlite
 #region Send Telegram msg
-	$nuevaLinea="%0A"
+	global $nuevaLinea="%0A"
+	global $msgToAllSecuence=IniRead($configPath,"Messaging","msgToAllSecuence","xxxxx")
 #endregion
 #region Telegram Bot
 	global $DEVChatID = IniRead($configPath,"dev","chatID","00000000")

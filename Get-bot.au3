@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=Telegram Bot Handeler
 #AutoIt3Wrapper_Res_Description=Telegram Bot Handeler
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.53
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.54
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_LegalCopyright=By Marcelo Saied
 #AutoIt3Wrapper_Run_Obfuscator=y

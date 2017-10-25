@@ -17,6 +17,13 @@ Func ParseBotMessage($UserID,$Fname,$Lname,$epoch,$mensage,$TweetID)
 		return false
 	endif
 
+	if AIMessage($mensage,$msgToAllSecuence) then
+		$msg=StringReplace($mensage,$msgToAllSecuence&" ","")
+		$ret=sendmessages($msg)
+		if $ret then return true
+		return false
+	endif
+
 	$ret=TelegramBaseMessage($TweetID,$mensage,$UserID,$Fname,$Lname,$epoch)
 	if $ret=0 then return true
 	return false
