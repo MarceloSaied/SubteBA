@@ -87,7 +87,7 @@
 	Func TelegramSTOPMessage($UserID)
 		$message ="Los mensajes de alertas han sido deshabilitados" & $nuevaLinea
 		$message&='/START -> Para habilitar la recepcion de alertas'  & $nuevaLinea
-		$message&='INFO -> para mas informacion.'  & $nuevaLinea
+		$message&='/INFO -> para mas informacion.'  & $nuevaLinea
 
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
@@ -95,7 +95,7 @@
 	Func TelegramSTARTMessage($UserID)
 		$message ="Los mensajes de alertas han sido habilitados" & $nuevaLinea
 		$message&='/STOP-> Para deshabilitar la recepcion de alertas'  & $nuevaLinea
-		$message&='INFO -> para mas informacion.'  & $nuevaLinea
+		$message&='/INFO -> para mas informacion.'  & $nuevaLinea
 
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
@@ -111,7 +111,7 @@
 	Func TelegramBaseMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
 		$message ="No logro entender el mensaje."
 		$message&='Reintente enviar el comando nuevamente.'  & $nuevaLinea
-		$message&='INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
+		$message&='/INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
 ;~ 		$message&="Su mensage:" & $nuevaLinea & $USRmsg
 		$respuesta = SendTelegramexec($UserID,$message)
 		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
@@ -306,6 +306,7 @@
 		ConsoleWrite('  '&@HOUR & ':' & @MIN&  ':' & @sec & '  Update users.  ' )
 		local $s=GetBotUpdates()
 		if $s then
+			initMsgClass()
 			$s=ParseForUserUpdate($s)
 			ConsoleWrite('  $s = ' & $s & @crlf )
 			if $s then
@@ -317,12 +318,17 @@
 					Else
 						ConsoleWrite('  Updating... ' & @crlf)
 						$UpdateIDArr = StripIntJS($jsonObj.jsonPath( "$.result..update_id").stringify()  )
+						$MSGIDArr =   StripIntJS($jsonObj.jsonPath( "$.result..message.message_id").stringify())
 						$UserIDArr =   StripIntJS($jsonObj.jsonPath( "$.result..message.from.id").stringify())
 						$FnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())
 						$LnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
+						$ChatIDArr =   StripIntJS($jsonObj.jsonPath( "$.result..message.chat.id").stringify())
+						$ChatFnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())
+						$ChatLnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
 						$epochArr =    StripIntJS($jsonObj.jsonPath( "$.result..message.date").stringify())
 						$menssageArr = StripStrJS($jsonObj.jsonPath( "$.result..message.text").stringify())
 						$IsBot =       StripIntJS($jsonObj.jsonPath( "$.result..message.from.is_bot").stringify())
+
 						if $UserIDArr[0] = $UpdateIDArr[0] AND  $UserIDArr[0] = $FnameArr[0] AND _
 							$UserIDArr[0] = $LnameArr[0]    AND  $UserIDArr[0] = $epochArr[0] AND _
 							$UserIDArr[0] = $menssageArr[0] AND  $UserIDArr[0] = $IsBot[0]  then
@@ -337,11 +343,22 @@
 								Else
 									ConsoleWrite('+(' & @ScriptLineNumber & ') : $menssageArr[$i] = ' & $menssageArr[$i] & @crlf )
 									ConsoleWrite('+(' & @ScriptLineNumber & ') : $IsBot[$i] = ' & $IsBot[$i] & @crlf )
-									$retBad=1
+									if AImessage($menssageArr[$i],"callback_query") then
+										TelegramActivateMessage($UpdateIDArr[$i],$menssageArr[$i],$ChatIDArr[$i],$ChatFnameArr[$i],$ChatLnameArr[$i],$epochArr[$i])
+										$UpdateID=$UpdateIDArr[$i]
+										$ahora=0
+										_DeleteMsg($ChatIDArr[$i], $MSGIDArr[$i])
+									Else
+										$retBad=1
+									endif
 								endif
 							next
 							if $retBad=0 then Set_BotOffSet($UpdateID+1)
 						Else
+							_printFromArray($ChatIDArr,"$ChatIDArr")
+							_printFromArray($ChatFnameArr,"$ChatFnameArr")
+							_printFromArray($ChatLnameArr,"$ChatLnameArr")
+							_printFromArray($MSGIDArr,"$MSGIDArr")
 							_printFromArray($UserIDArr,"UserIDArr")
 							_printFromArray($FnameArr,"FnameArr")
 							_printFromArray($LnameArr,"LnameArr")
