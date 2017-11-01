@@ -123,6 +123,25 @@
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
 	EndFunc
+	Func TelegramLocationMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
+		$message ="La Funcion de Informacion sobre las estaciones mas cercanas "
+		$message&='No esta implementado en este momento.'  & $nuevaLinea
+		$message&='/INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
+;~ 		$message&="Su mensage:" & $nuevaLinea & $USRmsg
+		$respuesta = SendTelegramexec($UserID,$message)
+		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
+		return $respuesta
+	EndFunc
+	Func TelegramActivateMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
+		$message ="La Funcion de Activacion de alertas por linea, "
+		$message&='No esta implementado en este momento.'  & $nuevaLinea
+		$message&='/INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
+		$message&=$USRmsg& $nuevaLinea
+;~ 		$message&="Su mensage:" & $nuevaLinea & $USRmsg
+		$respuesta = SendTelegramexec($UserID,$message)
+		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
+		return $respuesta
+	EndFunc
 	Func ReformatMessage($message)
 ;~ 	ConsoleWrite('++ReformatMessage() = '& @crlf)
 		$msgArr=StringSplit($message,"Actualizado",1)
@@ -370,13 +389,34 @@
 		return $stArr
 	EndFunc
 	Func ParseForUserUpdate($s)
+;~ 		eliminate "edited_message":{"
+		$s=StringReplace($s,'"edited_message":{','"message":{')
+
+;~ 		eliminate "callback_query":{"
+		if StringInStr($s,'"callback_query":')> 0 then
+			$s=StringRegExpReplace($s,'(?s)(?i)"callback_query":(.*?)"from":(.*?)},',"")
+			$s=StringRegExpReplace($s,'},"chat_instance":"(.*?)"',"")
+			$s=StringRegExpReplace($s,',"text":"(.*?)",',",")
+			$s=StringRegExpReplace($s,',"data":"',',"text":"callback_query ')
+		endif
 ;~ 		eliminate location info
 ;~ "location":{"latitude":-34.631010,"longitude":-58.469731}}
-		$s=StringRegExpReplace($s,'(?s)(?i)"location":{"latitude":(.*?),"longitude":(.*?)}'  ,  '"text": ""' )
+		if StringInStr($s,'"location":{')> 0 then
+			$MsgClass[0]="Location"
+				$posini=StringInStr($s,'{"latitude":')+12
+				$posend=StringInStr($s,'"longitude":')-$posini-1
+			$MsgClass[1]=StringMid($s,$posini,$posend)
+				$posini=StringInStr($s,'"longitude":')+12
+			$MsgClass[2]=StringMid($s,$posini,$posend)
+			$s=StringRegExpReplace($s,'(?s)(?i)"location":{"latitude":(.*?),"longitude":(.*?)}' , '"text": "' & $MsgClass[0] & ":" & $MsgClass[1] & ":" & $MsgClass[2] & '"' )
+		endif
+
 ;~ 		eliminate contact info
 		$s=StringRegExpReplace($s,'(?s)(?i)"contact":(.*?)}'  ,  '"text": ""' )
+
 ;~ 		replace username last-name
 		$s=StringReplace($s,'"username":','"last_name":')
+
 ;~ 		eliminate sticker info
 		$s=StringRegExpReplace($s,'(?s)(?i)"sticker":(.*?)}(.*?)}'  ,  '"text": ""' )
 		return $s
