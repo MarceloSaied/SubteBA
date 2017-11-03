@@ -79,7 +79,7 @@ Func _SendMsg($ChatID=$DEVChatID, $Text="test", $ParseMode = Default, $KeyboardM
 ;~ 	ConsoleWrite('@@(' & @ScriptLineNumber & ') : $Query = ' & $Query & @crlf )
    Local $Response = HttpPost($Query)
 	ConsoleWrite('@@(' & @ScriptLineNumber & ') : $Response = ' & $Response & @crlf )
-	if StringInStr($response,'"ok":true')>0 then Return True
+	if StringInStr($response,'"ok":true')>0 then Return $Response
    Return False
 EndFunc ;==> _SendMsg
 Func _DeleteMsg($ChatID, $MsgID, $DisableNotification = true)

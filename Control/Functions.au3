@@ -336,7 +336,7 @@
 							for $i=1 to $UserIDArr[0]
 								if $IsBot[$i] <> "true" then
 									$ret=SQLregister($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i])
-									$ret1=ParseBotMessage($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i],$UpdateIDArr[$i])
+									$ret1=ParseBotMessage($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i],$UpdateIDArr[$i],$MSGIDArr[$i])
 									ConsoleWrite('>> $ret1 = ' & $ret1 & @crlf )
 									if (Not $ret) or (Not $ret1)  then	$retBad+=1
 									$UpdateID=$UpdateIDArr[$i]
@@ -344,10 +344,14 @@
 									ConsoleWrite('+(' & @ScriptLineNumber & ') : $menssageArr[$i] = ' & $menssageArr[$i] & @crlf )
 									ConsoleWrite('+(' & @ScriptLineNumber & ') : $IsBot[$i] = ' & $IsBot[$i] & @crlf )
 									if AImessage($menssageArr[$i],"callback_query") then
-										TelegramActivateMessage($UpdateIDArr[$i],$menssageArr[$i],$ChatIDArr[$i],$ChatFnameArr[$i],$ChatLnameArr[$i],$epochArr[$i])
+										if AImessage($menssageArr[$i],"CLOSE_O") then
+											TelegramActivateMessage($UpdateIDArr[$i],$menssageArr[$i],$ChatIDArr[$i],$ChatFnameArr[$i],$ChatLnameArr[$i],$epochArr[$i])
+											_DeleteMsg($ChatIDArr[$i], $MSGIDArr[$i])
+										else
+											SQLUpdateUserAlerts($ChatIDArr[$i],$menssageArr[$i])
+										endif
 										$UpdateID=$UpdateIDArr[$i]
 										$ahora=0
-										_DeleteMsg($ChatIDArr[$i], $MSGIDArr[$i])
 									Else
 										$retBad=1
 									endif
@@ -373,6 +377,7 @@
 				endif
 			endif
 		endif
+		ClearKeyBoards()
 	EndFunc
 	Func GetBotUpdates()
 		$offset=Get_BotOffSet()
@@ -506,6 +511,99 @@
 			return 0
 		endif
 		Return 0
+	EndFunc
+	Func SQLUpdateUserAlerts($UserID,$mensage,$active=1)
+		$msgArr=StringSplit($mensage,"_")
+		if $msgArr[2]="ON" then
+
+		endif
+;~ 		$query='UPDATE  Users SET Active=' & $active &' WHERE UserID='& $UserID & ' ;'
+;~ 		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+;~ 			return true
+;~ 		Else
+;~ 			ConsoleWrite("       Error updating active user User ErrNo 1012" & @CRLF & $query& @crlf)
+;~ 			Return false
+;~ 		EndIf
+	EndFunc
+#endregion
+#region   ===================================   keyboard   ==========================
+	Func SQLregisterKeyboard($UserID,$MsgID,$epoch)
+		ConsoleWrite('++(' & @ScriptLineNumber & ') : insert = ' & $epoch & @crlf )
+		$query='INSERT INTO Keyboard VALUES (' & $UserID & ',' & $MsgID  & ',' & $epoch & ') ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then return true
+		Return false
+	EndFunc
+	Func SQLUnRegisterKeyboard($UserID,$MsgID)
+		ConsoleWrite('!!(' & @ScriptLineNumber & ') : delete = '  & @crlf )
+		$query='DELETE FROM Keyboard WHERE UserID=' & $UserID & ' AND MsgID=' & $MsgID & ' ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then return true
+		Return false
+	EndFunc
+	Func ClearKeyBoards()
+		$query='SELECT UserID,MsgID FROM Keyboard WHERE Timestamp < ' & _GetUnixTime()-60 & ';'
+		_SQLITEqry($query,$dbfullPath)
+		If  IsArray($qryResult) Then
+			_printFromArray($qryResult)
+			if UBound($qryResult)>1 then
+				for $i=1 to UBound($qryResult)-1
+					_DeleteMsg( $qryResult[$i][0],$qryResult[$i][1])
+					SQLUnRegisterKeyboard($qryResult[$i][0],$qryResult[$i][1])
+				next
+			EndIf
+		endif
+	EndFunc
+	func KeyboardActivate($UserID)
+		$keybrd =  '{"inline_keyboard":['
+		$keybrd &= '['
+		$keybrd &= '{"text":"Linea A","callback_data":"A_ON"},'
+		$keybrd &= '{"text":"Linea B","callback_data":"B_ON"},'
+		$keybrd &= '{"text":"Linea C","callback_data":"C_ON"}'
+		$keybrd &= '],['
+		$keybrd &= '{"text":"Linea D","callback_data":"D_ON"},'
+		$keybrd &= '{"text":"Linea E","callback_data":"E_ON"},'
+		$keybrd &= '{"text":"Linea H","callback_data":"H_ON"}'
+		$keybrd &= '],['
+		$keybrd &= '{"text":"Linea P","callback_data":"P_ON"},'
+		$keybrd &= '{"text":"Linea U","callback_data":"U_ON"},'
+		$keybrd &= '{"text":"Listo","callback_data":"CLOSE_ON"}'
+		$keybrd &= '],['
+		$keybrd &= ']'
+		$keybrd &= ']}'
+		$res=_SendMsg($UserID,"Sus alertas activas son:"& "" & $nuevaLinea & "Cual desea activar?","HTML",$keybrd)
+		$MSGID=StringRegExp($res,'"message_id":(.*?),"from":',1)
+		$UsrID=StringRegExp($res,',"chat":{"id":(.*?),"first_name":',1)
+		$utime=StringRegExp($res,',"date":(.*?),"text":',1)
+		if IsArray($MSGID) then
+			SQLregisterKeyboard($UsrID[0],$MsgID[0],$utime[0])
+		endif
+		if $res then return True
+		return false
+	EndFunc
+	func KeyboardDesActivate($UserID)
+		$keybrd =  '{"inline_keyboard":['
+		$keybrd &= '['
+		$keybrd &= '{"text":"Linea A","callback_data":"A_OFF"},'
+		$keybrd &= '{"text":"Linea B","callback_data":"B_OFF"},'
+		$keybrd &= '{"text":"Linea C","callback_data":"C_OFF"}'
+		$keybrd &= '],['
+		$keybrd &= '{"text":"Linea D","callback_data":"D_OFF"},'
+		$keybrd &= '{"text":"Linea E","callback_data":"E_OFF"},'
+		$keybrd &= '{"text":"Linea H","callback_data":"H_OFF"}'
+		$keybrd &= '],['
+		$keybrd &= '{"text":"Linea P","callback_data":"P_OFF"},'
+		$keybrd &= '{"text":"Linea U","callback_data":"U_OFF"},'
+		$keybrd &= '{"text":"Listo","callback_data":"CLOSE_OFF"}'
+		$keybrd &= '],['
+		$keybrd &= ']'
+		$keybrd &= ']}'
+		$res=_SendMsg($UserID,"Sus alertas activas son:"& "" & $nuevaLinea & "Cual desea desactivar?","HTML",$keybrd)
+		$MSGID=StringRegExp($res,'"message_id":(.*?),"from":',1)
+		$UsrID=StringRegExp($res,',"chat":{"id":(.*?),"first_name":',1)
+		if IsArray($MSGID) then
+			SQLunregisterKeyboard($UsrID[0],$MsgID[0])
+		endif
+		if $res then return True
+		return false
 	EndFunc
 #endregion
 #region   ===========================================================================
