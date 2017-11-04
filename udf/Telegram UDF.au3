@@ -78,10 +78,9 @@ Func _SendMsg($ChatID=$DEVChatID, $Text="test", $ParseMode = Default, $KeyboardM
    If $DisableNotification 	= True Then $Query &= "&disable_notification=True"
 ;~ 	ConsoleWrite('@@(' & @ScriptLineNumber & ') : $Query = ' & $Query & @crlf )
    Local $Response = HttpPost($Query)
-	ConsoleWrite('@@(' & @ScriptLineNumber & ') : $Response = ' & $Response & @crlf )
-
-   ;Return $Response
-   Return True
+;~ 	ConsoleWrite('@@(' & @ScriptLineNumber & ') : $Response = ' & $Response & @crlf )
+	if StringInStr($response,'"ok":true')>0 then Return $Response
+   Return False
 EndFunc ;==> _SendMsg
 Func _DeleteMsg($ChatID, $MsgID, $DisableNotification = true)
    Local $Query = "https://api.telegram.org/" & $token & "/deleteMessage?chat_id=" & $ChatID & "&message_id=" & $MsgID

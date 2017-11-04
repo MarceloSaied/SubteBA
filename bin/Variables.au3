@@ -25,7 +25,14 @@
 	endfunc
 #endregion sqlite
 #region Send Telegram msg
-	$nuevaLinea="%0A"
+	global $nuevaLinea="%0A"
+	Dim $MsgClass[5] ;ClaseMensage,
+	Func InitMsgClass()
+		for $u=0 to UBound($MsgClass)-1
+			$MsgClass[$u]=""
+		next
+	EndFunc
+	global $msgToAllSecuence=IniRead($configPath,"Messaging","msgToAllSecuence","xxxxx")
 #endregion
 #region Telegram Bot
 	global $DEVChatID = IniRead($configPath,"dev","chatID","00000000")
@@ -50,6 +57,9 @@
 	global $GetUpdateTimeSec=IniRead($configPath,"Times","BotUpdateTimeSec","10")
 		ConsoleWrite('//  Telegram GetUpdates every Sec ' & Sec2Time($GetUpdateTimeSec) & @crlf )
 	global $GetUpdateTimeMsec=$GetUpdateTimeSec*1000
+	global $ahora=1
+	global $KeyBoardActive=0
+	global $KeyboardCheckcount=0
 #endregion
 _DBvarInit()
 

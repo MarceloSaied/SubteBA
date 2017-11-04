@@ -69,17 +69,18 @@
 		$message&='Este canal no es official del subte de Buenos Aires Ni de Metrovias.'  & $nuevaLinea
 		$message&= $nuevaLinea
 		$message&='Commandos:'  & $nuevaLinea
-		$message&='/START -> Activa la recepcion de alertas. '  & $nuevaLinea
-		$message&='/STOP  -> Desactiva la recepcion de alertas. '  & $nuevaLinea
-		$message&='/INFO -> Muestra este mensage'  & $nuevaLinea
+		$message&='/START -> Activa alertas. '  & $nuevaLinea
+		$message&='/STOP  -> Desactiva alertas. '  & $nuevaLinea
+		$message&='/INFO   -> Este mensaje'  & $nuevaLinea
 		$message&= $nuevaLinea
 		$message&='Futuros Comandos:'  & $nuevaLinea
-		$message&='/ACTIVAR A B -> Recepcion de alertas de la Linea A, B (C, D, E, H, P, U)'  & $nuevaLinea
-		$message&='/DESACTIVAR A B -> Recepcion de alertas de la Linea A, B (C, D, E, H, P, U)'  & $nuevaLinea
-		$message&='/ESTACIONES A -> lista de estaciones de la linea A( B, C, D, E, H, P, U)'  & $nuevaLinea
-		$message&='/HORARIOS  -> Horarios de actividad'  & $nuevaLinea
-		$message&='/MAPA  -> Mapa de lineas de subte'  & $nuevaLinea
-		$message&='/PROPUESTA propuesta -> Enviar propuestas'  & $nuevaLinea
+		$message&='/ACTIVAR -> Alertas de lineas elegidas.'  & $nuevaLinea
+		$message&='/DESACTIVAR -> Alertas de lineas elegidas.'  & $nuevaLinea
+		$message&='/CERCANA -> Estacion mas cercana.'  & $nuevaLinea
+		$message&='/ESTACIONES -> lista de estaciones por linea.'  & $nuevaLinea
+		$message&='/HORARIOS -> Horarios de actividad'  & $nuevaLinea
+		$message&='/MAPA -> Mapa de lineas de subte'  & $nuevaLinea
+		$message&='/PROPUESTA -> Enviar propuestas'  & $nuevaLinea
 
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
@@ -87,7 +88,7 @@
 	Func TelegramSTOPMessage($UserID)
 		$message ="Los mensajes de alertas han sido deshabilitados" & $nuevaLinea
 		$message&='/START -> Para habilitar la recepcion de alertas'  & $nuevaLinea
-		$message&='INFO -> para mas informacion.'  & $nuevaLinea
+		$message&='/INFO -> para mas informacion.'  & $nuevaLinea
 
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
@@ -95,7 +96,7 @@
 	Func TelegramSTARTMessage($UserID)
 		$message ="Los mensajes de alertas han sido habilitados" & $nuevaLinea
 		$message&='/STOP-> Para deshabilitar la recepcion de alertas'  & $nuevaLinea
-		$message&='INFO -> para mas informacion.'  & $nuevaLinea
+		$message&='/INFO -> para mas informacion.'  & $nuevaLinea
 
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
@@ -111,7 +112,7 @@
 	Func TelegramBaseMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
 		$message ="No logro entender el mensaje."
 		$message&='Reintente enviar el comando nuevamente.'  & $nuevaLinea
-		$message&='INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
+		$message&='/INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
 ;~ 		$message&="Su mensage:" & $nuevaLinea & $USRmsg
 		$respuesta = SendTelegramexec($UserID,$message)
 		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
@@ -121,6 +122,25 @@
 		$message ="Nunevo usuario:" & $nuevaLinea
 		$message&=$Fname & "  " & $Lname
 		$respuesta = SendTelegramexec($UserID,$message)
+		return $respuesta
+	EndFunc
+	Func TelegramLocationMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
+		$message ="La Funcion de Informacion sobre las estaciones mas cercanas "
+		$message&='No esta implementado en este momento.'  & $nuevaLinea
+		$message&='/INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
+;~ 		$message&="Su mensage:" & $nuevaLinea & $USRmsg
+		$respuesta = SendTelegramexec($UserID,$message)
+		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
+		return $respuesta
+	EndFunc
+	Func TelegramActivateMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
+		$message ="La Funcion de Activacion de alertas por linea, "
+		$message&='No esta implementado en este momento.'  & $nuevaLinea
+		$message&='/INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
+;~ 		$message&=$USRmsg& $nuevaLinea
+;~ 		$message&="Su mensage:" & $nuevaLinea & $USRmsg
+		$respuesta = SendTelegramexec($UserID,$message)
+		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
 		return $respuesta
 	EndFunc
 	Func ReformatMessage($message)
@@ -287,8 +307,9 @@
 		ConsoleWrite('  '&@HOUR & ':' & @MIN&  ':' & @sec & '  Update users.  ' )
 		local $s=GetBotUpdates()
 		if $s then
+			initMsgClass()
 			$s=ParseForUserUpdate($s)
-			ConsoleWrite('  $s = ' & $s & @crlf )
+;~ 			ConsoleWrite('  $s = ' & $s & @crlf )
 			if $s then
 				$oJSON = _OO_JSON_Init()
 				$jsonObj = $oJSON.parse($s)
@@ -298,12 +319,17 @@
 					Else
 						ConsoleWrite('  Updating... ' & @crlf)
 						$UpdateIDArr = StripIntJS($jsonObj.jsonPath( "$.result..update_id").stringify()  )
+						$MSGIDArr =    StripIntJS($jsonObj.jsonPath( "$.result..message.message_id").stringify())
 						$UserIDArr =   StripIntJS($jsonObj.jsonPath( "$.result..message.from.id").stringify())
 						$FnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())
 						$LnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
+						$ChatIDArr =   StripIntJS($jsonObj.jsonPath( "$.result..message.chat.id").stringify())
+						$ChatFnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())
+						$ChatLnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
 						$epochArr =    StripIntJS($jsonObj.jsonPath( "$.result..message.date").stringify())
 						$menssageArr = StripStrJS($jsonObj.jsonPath( "$.result..message.text").stringify())
 						$IsBot =       StripIntJS($jsonObj.jsonPath( "$.result..message.from.is_bot").stringify())
+
 						if $UserIDArr[0] = $UpdateIDArr[0] AND  $UserIDArr[0] = $FnameArr[0] AND _
 							$UserIDArr[0] = $LnameArr[0]    AND  $UserIDArr[0] = $epochArr[0] AND _
 							$UserIDArr[0] = $menssageArr[0] AND  $UserIDArr[0] = $IsBot[0]  then
@@ -311,18 +337,36 @@
 							for $i=1 to $UserIDArr[0]
 								if $IsBot[$i] <> "true" then
 									$ret=SQLregister($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i])
-									$ret1=ParseBotMessage($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i],$UpdateIDArr[$i])
+									$ret1=ParseBotMessage($UserIDArr[$i],$FnameArr[$i],$LnameArr[$i],$epochArr[$i],$menssageArr[$i],$UpdateIDArr[$i],$MSGIDArr[$i])
 									ConsoleWrite('>> $ret1 = ' & $ret1 & @crlf )
 									if (Not $ret) or (Not $ret1)  then	$retBad+=1
 									$UpdateID=$UpdateIDArr[$i]
 								Else
 									ConsoleWrite('+(' & @ScriptLineNumber & ') : $menssageArr[$i] = ' & $menssageArr[$i] & @crlf )
 									ConsoleWrite('+(' & @ScriptLineNumber & ') : $IsBot[$i] = ' & $IsBot[$i] & @crlf )
-									$retBad=1
+									if AImessage($menssageArr[$i],"callback_query") then
+										if AImessage($menssageArr[$i],"CLOSE_O") then
+											$ahora=1
+											TelegramActivateMessage($UpdateIDArr[$i],$menssageArr[$i],$ChatIDArr[$i],$ChatFnameArr[$i],$ChatLnameArr[$i],$epochArr[$i])
+											_DeleteMsg($ChatIDArr[$i], $MSGIDArr[$i])
+											$KeyBoardActive=0
+										else
+											$ret=SQLUpdateUserAlerts($ChatIDArr[$i],$menssageArr[$i])
+											if not $ret then $retBad=1
+											$ahora=0.2
+										endif
+										$UpdateID=$UpdateIDArr[$i]
+									Else
+										$retBad=1
+									endif
 								endif
 							next
 							if $retBad=0 then Set_BotOffSet($UpdateID+1)
 						Else
+							_printFromArray($ChatIDArr,"$ChatIDArr")
+							_printFromArray($ChatFnameArr,"$ChatFnameArr")
+							_printFromArray($ChatLnameArr,"$ChatLnameArr")
+							_printFromArray($MSGIDArr,"$MSGIDArr")
 							_printFromArray($UserIDArr,"UserIDArr")
 							_printFromArray($FnameArr,"FnameArr")
 							_printFromArray($LnameArr,"LnameArr")
@@ -337,6 +381,13 @@
 				endif
 			endif
 		endif
+		if $KeyBoardActive=1 or $KeyboardCheckcount > 5 then
+			ClearKeyBoards()
+			$KeyboardCheckcount = 0
+		Else
+			$KeyboardCheckcount = $KeyboardCheckcount +1
+		endif
+		ConsoleWrite('**(' & @ScriptLineNumber & ') : $KeyBoardActive= ' & $KeyBoardActive &@crlf )
 	EndFunc
 	Func GetBotUpdates()
 		$offset=Get_BotOffSet()
@@ -370,13 +421,51 @@
 		return $stArr
 	EndFunc
 	Func ParseForUserUpdate($s)
+;~ 		eliminate "edited_message":{"
+		$s=StringReplace($s,'"edited_message":{','"message":{')
+
+;     check lastname
+		$LNarr=StringRegExp($s,'"first_name":"(.*?)","language_code":"',1)
+		if IsArray($LNarr) then
+			for $r=0 to UBound($LNarr)-1
+				$donde='"first_name":"[a-zA-Z]*","language_code":"'
+				$pat='"first_name":"' & $LNarr[$r] & '","last_name":"xxx","language_code":"'
+				$s=StringRegExpReplace($s,$donde,$pat)
+
+				$donde='"first_name":"[a-zA-Z]*","type":"'
+				$pat='"first_name":"' & $LNarr[$r] & '","last_name":"xxx","type":"'
+				$s=StringRegExpReplace($s,$donde,$pat)
+			next
+		endif
+
+;~ 		eliminate "callback_query":{"
+		if StringInStr($s,'"callback_query":')> 0 then
+			$s=StringRegExpReplace($s,'(?s)(?i)"callback_query":(.*?)"from":(.*?)},',"")
+			$s=StringRegExpReplace($s,'},"chat_instance":"(.*?)"',"")
+			$s=StringRegExpReplace($s,',"text":"(.*?)",',",")
+			$s=StringRegExpReplace($s,',"data":"',',"text":"callback_query ')
+		endif
 ;~ 		eliminate location info
 ;~ "location":{"latitude":-34.631010,"longitude":-58.469731}}
-		$s=StringRegExpReplace($s,'(?s)(?i)"location":{"latitude":(.*?),"longitude":(.*?)}'  ,  '"text": ""' )
+		if StringInStr($s,'"location":{')> 0 then
+			$MsgClass[0]="Location"
+				$posini=StringInStr($s,'{"latitude":')+12
+				$posend=StringInStr($s,'"longitude":')-$posini-1
+			$MsgClass[1]=StringMid($s,$posini,$posend)
+				$posini=StringInStr($s,'"longitude":')+12
+			$MsgClass[2]=StringMid($s,$posini,$posend)
+			$s=StringRegExpReplace($s,'(?s)(?i)"location":{"latitude":(.*?),"longitude":(.*?)}' , '"text": "' & $MsgClass[0] & ":" & $MsgClass[1] & ":" & $MsgClass[2] & '"' )
+		endif
+
 ;~ 		eliminate contact info
 		$s=StringRegExpReplace($s,'(?s)(?i)"contact":(.*?)}'  ,  '"text": ""' )
+
+;~ 		eliminate photo info
+		$s=StringRegExpReplace($s,'(?s)(?i)"photo":\[(.*?)\]'  ,  '"text": ""' )
+
 ;~ 		replace username last-name
 		$s=StringReplace($s,'"username":','"last_name":')
+
 ;~ 		eliminate sticker info
 		$s=StringRegExpReplace($s,'(?s)(?i)"sticker":(.*?)}(.*?)}'  ,  '"text": ""' )
 		return $s
@@ -449,6 +538,106 @@
 			return 0
 		endif
 		Return 0
+	EndFunc
+	Func SQLUpdateUserAlerts($UserID,$mensage,$active=1)
+		$mensage=StringReplace($mensage,"callback_query ","")
+		$msgArr=StringSplit($mensage,"_")
+		_printfromarray($msgArr)
+		if $msgArr[2]="ON" then
+			$query='UPDATE AlertasLineas SET ' & $msgArr[1] & '=1 WHERE userid=' & $UserID & ';   '
+			$query&='INSERT INTO AlertasLineas (userid,' & $msgArr[1] & ')  SELECT ' & $UserID & ',1 WHERE (Select Changes() = 0);'
+			if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+				return true
+			Else
+				ConsoleWrite("!    Error updating alertasLineas User ErrNo 1013" & @CRLF & $query& @crlf)
+				Return false
+			EndIf
+		endif
+	EndFunc
+#endregion
+#region   ===================================   keyboard   ==========================
+	;============== show keyboard =========================
+	func KeyboardActivate($UserID)
+		$keybrd =  '{"inline_keyboard":['
+		$keybrd &= '['
+		$keybrd &= '{"text":"Linea A","callback_data":"A_ON"},'
+		$keybrd &= '{"text":"Linea B","callback_data":"B_ON"},'
+		$keybrd &= '{"text":"Linea C","callback_data":"C_ON"}'
+		$keybrd &= '],['
+		$keybrd &= '{"text":"Linea D","callback_data":"D_ON"},'
+		$keybrd &= '{"text":"Linea E","callback_data":"E_ON"},'
+		$keybrd &= '{"text":"Linea H","callback_data":"H_ON"}'
+		$keybrd &= '],['
+		$keybrd &= '{"text":"Linea P","callback_data":"P_ON"},'
+		$keybrd &= '{"text":"Linea U","callback_data":"U_ON"},'
+		$keybrd &= '{"text":"Listo","callback_data":"CLOSE_ON"}'
+		$keybrd &= '],['
+		$keybrd &= ']'
+		$keybrd &= ']}'
+		$res=_SendMsg($UserID,"Sus alertas activas son:"& "" & $nuevaLinea & "Cual desea activar?","HTML",$keybrd)
+		$MSGID=StringRegExp($res,'"message_id":(.*?),"from":',1)
+		$UsrID=StringRegExp($res,',"chat":{"id":(.*?),"first_name":',1)
+		$utime=StringRegExp($res,',"date":(.*?),"text":',1)
+		if IsArray($MSGID) then	SQLregisterKeyboard($UsrID[0],$MsgID[0],$utime[0])
+		if $res then return True
+		return false
+	EndFunc
+	func KeyboardDesActivate($UserID)
+		$keybrd =  '{"inline_keyboard":['
+		$keybrd &= '['
+		$keybrd &= '{"text":"Linea A","callback_data":"A_OFF"},'
+		$keybrd &= '{"text":"Linea B","callback_data":"B_OFF"},'
+		$keybrd &= '{"text":"Linea C","callback_data":"C_OFF"}'
+		$keybrd &= '],['
+		$keybrd &= '{"text":"Linea D","callback_data":"D_OFF"},'
+		$keybrd &= '{"text":"Linea E","callback_data":"E_OFF"},'
+		$keybrd &= '{"text":"Linea H","callback_data":"H_OFF"}'
+		$keybrd &= '],['
+		$keybrd &= '{"text":"Linea P","callback_data":"P_OFF"},'
+		$keybrd &= '{"text":"Linea U","callback_data":"U_OFF"},'
+		$keybrd &= '{"text":"Listo","callback_data":"CLOSE_OFF"}'
+		$keybrd &= '],['
+		$keybrd &= ']'
+		$keybrd &= ']}'
+		$res=_SendMsg($UserID,"Sus alertas activas son:"& "" & $nuevaLinea & "Cual desea desactivar?","HTML",$keybrd)
+		$MSGID=StringRegExp($res,'"message_id":(.*?),"from":',1)
+		$UsrID=StringRegExp($res,',"chat":{"id":(.*?),"first_name":',1)
+		$utime=StringRegExp($res,',"date":(.*?),"text":',1)
+		if IsArray($MSGID) then	SQLregisterKeyboard($UsrID[0],$MsgID[0],$utime[0])
+		if $res then return True
+		return false
+	EndFunc
+	Func SQLregisterKeyboard($UserID,$MsgID,$epoch)
+		$query='INSERT INTO Keyboard VALUES (' & $UserID & ',' & $MsgID  & ',' & $epoch & ') ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+			$KeyBoardActive=1
+			$ahora=0.2
+			return true
+		endif
+		Return false
+	EndFunc
+	;==================   limpiar keyboard  =====================
+	Func ClearKeyBoards()
+		ConsoleWrite('**(' & @ScriptLineNumber & ') : ClearKeyBoards()  $KeyBoardActive= ' & $KeyBoardActive &@crlf )
+		$query='SELECT UserID,MsgID FROM Keyboard WHERE Timestamp < ' & _GetUnixTime()-60 & ';'
+		_SQLITEqry($query,$dbfullPath)
+;~ 		$ahora=0.2
+		If  IsArray($qryResult) Then
+			if UBound($qryResult)>1 then
+				for $i=1 to UBound($qryResult)-1
+					_printFromArray($qryResult)
+					ConsoleWrite('**@@(' & @ScriptLineNumber & ') : $i = ' & $i & @crlf )
+					_DeleteMsg( $qryResult[$i][0],$qryResult[$i][1])
+					SQLUnRegisterKeyboard($qryResult[$i][0],$qryResult[$i][1])
+					$ahora=1
+				next
+			EndIf
+		endif
+	EndFunc
+	Func SQLUnRegisterKeyboard($UserID,$MsgID)
+		$query='DELETE FROM Keyboard WHERE UserID=' & $UserID & ' AND MsgID=' & $MsgID & ' ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then return true
+		Return false
 	EndFunc
 #endregion
 #region   ===========================================================================

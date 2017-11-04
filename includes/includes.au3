@@ -12,6 +12,7 @@
 ;~ 	#include <IE.au3>
 #endregion UDF
 #region internal UDF
+	#include <../udf/ErrHandeler.au3>
 	#include <../udf/WinHttpConstants.au3>
 	#include <../udf/WinHttp.au3>
 	#include <../udf/WinHttp1.au3>

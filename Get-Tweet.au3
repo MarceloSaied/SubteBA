@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=SubteBA Telegram Alerter
 #AutoIt3Wrapper_Res_Description=SubteBA Telegram Alerter
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.57
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.63
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_LegalCopyright=By Marcelo Saied
 #AutoIt3Wrapper_Run_Obfuscator=y
