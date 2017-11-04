@@ -69,17 +69,18 @@
 		$message&='Este canal no es official del subte de Buenos Aires Ni de Metrovias.'  & $nuevaLinea
 		$message&= $nuevaLinea
 		$message&='Commandos:'  & $nuevaLinea
-		$message&='/START -> Activa la recepcion de alertas. '  & $nuevaLinea
-		$message&='/STOP  -> Desactiva la recepcion de alertas. '  & $nuevaLinea
-		$message&='/INFO -> Muestra este mensage'  & $nuevaLinea
+		$message&='/START -> Activa alertas. '  & $nuevaLinea
+		$message&='/STOP  -> Desactiva alertas. '  & $nuevaLinea
+		$message&='/INFO   -> Este mensaje'  & $nuevaLinea
 		$message&= $nuevaLinea
 		$message&='Futuros Comandos:'  & $nuevaLinea
-		$message&='/ACTIVAR A B -> Recepcion de alertas de la Linea A, B (C, D, E, H, P, U)'  & $nuevaLinea
-		$message&='/DESACTIVAR A B -> Recepcion de alertas de la Linea A, B (C, D, E, H, P, U)'  & $nuevaLinea
-		$message&='/ESTACIONES A -> lista de estaciones de la linea A( B, C, D, E, H, P, U)'  & $nuevaLinea
-		$message&='/HORARIOS  -> Horarios de actividad'  & $nuevaLinea
-		$message&='/MAPA  -> Mapa de lineas de subte'  & $nuevaLinea
-		$message&='/PROPUESTA propuesta -> Enviar propuestas'  & $nuevaLinea
+		$message&='/ACTIVAR -> Alertas de lineas elegidas.'  & $nuevaLinea
+		$message&='/DESACTIVAR -> Alertas de lineas elegidas.'  & $nuevaLinea
+		$message&='/CERCANA -> Estacion mas cercana.'  & $nuevaLinea
+		$message&='/ESTACIONES -> lista de estaciones por linea.'  & $nuevaLinea
+		$message&='/HORARIOS -> Horarios de actividad'  & $nuevaLinea
+		$message&='/MAPA -> Mapa de lineas de subte'  & $nuevaLinea
+		$message&='/PROPUESTA -> Enviar propuestas'  & $nuevaLinea
 
 		$respuesta = SendTelegramexec($UserID,$message)
 		return $respuesta
@@ -136,7 +137,7 @@
 		$message ="La Funcion de Activacion de alertas por linea, "
 		$message&='No esta implementado en este momento.'  & $nuevaLinea
 		$message&='/INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
-		$message&=$USRmsg& $nuevaLinea
+;~ 		$message&=$USRmsg& $nuevaLinea
 ;~ 		$message&="Su mensage:" & $nuevaLinea & $USRmsg
 		$respuesta = SendTelegramexec($UserID,$message)
 		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
@@ -308,7 +309,7 @@
 		if $s then
 			initMsgClass()
 			$s=ParseForUserUpdate($s)
-			ConsoleWrite('  $s = ' & $s & @crlf )
+;~ 			ConsoleWrite('  $s = ' & $s & @crlf )
 			if $s then
 				$oJSON = _OO_JSON_Init()
 				$jsonObj = $oJSON.parse($s)
