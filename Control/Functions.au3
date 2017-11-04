@@ -319,7 +319,7 @@
 					Else
 						ConsoleWrite('  Updating... ' & @crlf)
 						$UpdateIDArr = StripIntJS($jsonObj.jsonPath( "$.result..update_id").stringify()  )
-						$MSGIDArr =   StripIntJS($jsonObj.jsonPath( "$.result..message.message_id").stringify())
+						$MSGIDArr =    StripIntJS($jsonObj.jsonPath( "$.result..message.message_id").stringify())
 						$UserIDArr =   StripIntJS($jsonObj.jsonPath( "$.result..message.from.id").stringify())
 						$FnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.first_name").stringify())
 						$LnameArr =    StripStrJS($jsonObj.jsonPath( "$.result..message.from.last_name").stringify())
