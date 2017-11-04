@@ -59,6 +59,7 @@
 	global $GetUpdateTimeMsec=$GetUpdateTimeSec*1000
 	global $ahora=1
 	global $KeyBoardActive=0
+	global $KeyboardCheckcount=0
 #endregion
 _DBvarInit()
 

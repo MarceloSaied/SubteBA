@@ -29,15 +29,15 @@
 		else
 			If $iRval=26 Then
 				$encriptedMsg="DataBase file is encrypted or is not a database"
-				MsgBox(16, "Database Error: " & $iRval,"Database error . ErrNo 1001r" & @crlf & $encriptedMsg & @crlf & $DBfile & @CRLF & "version " & _SQLite_LibVersion() )
+;~ 				MsgBox(16, "Database Error: " & $iRval,"Database error . ErrNo 1001r" & @crlf & $encriptedMsg & @crlf & $DBfile & @CRLF & "version " & _SQLite_LibVersion() )
 			else
-				MsgBox(16, "Database Error: " & $iRval,"Database error . ErrNo 1001r" & @crlf & _SQLite_ErrMsg() & @crlf &  $SQLq  & @crlf & $DBfile & @CRLF & "version " & _SQLite_LibVersion() )
+;~ 				MsgBox(16, "Database Error: " & $iRval,"Database error . ErrNo 1001r" & @crlf & _SQLite_ErrMsg() & @crlf &  $SQLq  & @crlf & $DBfile & @CRLF & "version " & _SQLite_LibVersion() )
 			EndIf
 ;~ 			_SQLite_QueryFinalize($SQLq)
 			if $ExitOnError=1 then
 				_SQLite_QueryFinalize($SQLq)
 				_SQLite_Close($hDB)
-				exit
+				;exit
 			endif
 			return false
 		endif

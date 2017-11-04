@@ -346,13 +346,16 @@
 									ConsoleWrite('+(' & @ScriptLineNumber & ') : $IsBot[$i] = ' & $IsBot[$i] & @crlf )
 									if AImessage($menssageArr[$i],"callback_query") then
 										if AImessage($menssageArr[$i],"CLOSE_O") then
+											$ahora=1
 											TelegramActivateMessage($UpdateIDArr[$i],$menssageArr[$i],$ChatIDArr[$i],$ChatFnameArr[$i],$ChatLnameArr[$i],$epochArr[$i])
 											_DeleteMsg($ChatIDArr[$i], $MSGIDArr[$i])
+											$KeyBoardActive=0
 										else
-											SQLUpdateUserAlerts($ChatIDArr[$i],$menssageArr[$i])
+											$ret=SQLUpdateUserAlerts($ChatIDArr[$i],$menssageArr[$i])
+											if not $ret then $retBad=1
+											$ahora=0.2
 										endif
 										$UpdateID=$UpdateIDArr[$i]
-										$ahora=0
 									Else
 										$retBad=1
 									endif
@@ -378,7 +381,13 @@
 				endif
 			endif
 		endif
-		if $KeyBoardActive=1 then 	ClearKeyBoards()
+		if $KeyBoardActive=1 or $KeyboardCheckcount > 5 then
+			ClearKeyBoards()
+			$KeyboardCheckcount = 0
+		Else
+			$KeyboardCheckcount = $KeyboardCheckcount +1
+		endif
+		ConsoleWrite('**(' & @ScriptLineNumber & ') : $KeyBoardActive= ' & $KeyBoardActive &@crlf )
 	EndFunc
 	Func GetBotUpdates()
 		$offset=Get_BotOffSet()
@@ -535,12 +544,12 @@
 		$msgArr=StringSplit($mensage,"_")
 		_printfromarray($msgArr)
 		if $msgArr[2]="ON" then
-			$query='INSERT OR REPLACE INTO AlertasLineas (id, userid,' & $msgArr[1]
-			$query&=') VALUES ((SELECT id from AlertasLineas WHERE userid=' & $UserID & '),' & $UserID & ',1);'
+			$query='UPDATE AlertasLineas SET ' & $msgArr[1] & '=1 WHERE userid=' & $UserID & ';   '
+			$query&='INSERT INTO AlertasLineas (userid,' & $msgArr[1] & ')  SELECT ' & $UserID & ',1 WHERE (Select Changes() = 0);'
 			if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
 				return true
 			Else
-				ConsoleWrite("       Error updating alertasLineas User ErrNo 1013" & @CRLF & $query& @crlf)
+				ConsoleWrite("!    Error updating alertasLineas User ErrNo 1013" & @CRLF & $query& @crlf)
 				Return false
 			EndIf
 		endif
@@ -593,7 +602,8 @@
 		$res=_SendMsg($UserID,"Sus alertas activas son:"& "" & $nuevaLinea & "Cual desea desactivar?","HTML",$keybrd)
 		$MSGID=StringRegExp($res,'"message_id":(.*?),"from":',1)
 		$UsrID=StringRegExp($res,',"chat":{"id":(.*?),"first_name":',1)
-		if IsArray($MSGID) then	SQLregisterKeyboard($UsrID[0],$MsgID[0])
+		$utime=StringRegExp($res,',"date":(.*?),"text":',1)
+		if IsArray($MSGID) then	SQLregisterKeyboard($UsrID[0],$MsgID[0],$utime[0])
 		if $res then return True
 		return false
 	EndFunc
@@ -601,22 +611,25 @@
 		$query='INSERT INTO Keyboard VALUES (' & $UserID & ',' & $MsgID  & ',' & $epoch & ') ;'
 		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
 			$KeyBoardActive=1
+			$ahora=0.2
 			return true
 		endif
 		Return false
 	EndFunc
 	;==================   limpiar keyboard  =====================
 	Func ClearKeyBoards()
-		ConsoleWrite('**(' & @ScriptLineNumber & ') : ClearKeyBoards() = ' &@crlf )
+		ConsoleWrite('**(' & @ScriptLineNumber & ') : ClearKeyBoards()  $KeyBoardActive= ' & $KeyBoardActive &@crlf )
 		$query='SELECT UserID,MsgID FROM Keyboard WHERE Timestamp < ' & _GetUnixTime()-60 & ';'
 		_SQLITEqry($query,$dbfullPath)
+;~ 		$ahora=0.2
 		If  IsArray($qryResult) Then
-;~ 			_printFromArray($qryResult)
 			if UBound($qryResult)>1 then
 				for $i=1 to UBound($qryResult)-1
+					_printFromArray($qryResult)
+					ConsoleWrite('**@@(' & @ScriptLineNumber & ') : $i = ' & $i & @crlf )
 					_DeleteMsg( $qryResult[$i][0],$qryResult[$i][1])
 					SQLUnRegisterKeyboard($qryResult[$i][0],$qryResult[$i][1])
-					$KeyBoardActive=0
+					$ahora=1
 				next
 			EndIf
 		endif

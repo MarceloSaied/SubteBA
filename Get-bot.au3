@@ -43,7 +43,6 @@ while 1
 	while $GUTmsec > TimerDiff($beginGetUpdates)
 		Sleep(100)
 	wend
-	$ahora=1
 wend
 
 closeall()
