@@ -58,6 +58,7 @@
 		ConsoleWrite('//  Telegram GetUpdates every Sec ' & Sec2Time($GetUpdateTimeSec) & @crlf )
 	global $GetUpdateTimeMsec=$GetUpdateTimeSec*1000
 	global $ahora=1
+	global $KeyBoardActive=0
 #endregion
 _DBvarInit()
 

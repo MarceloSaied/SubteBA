@@ -378,7 +378,7 @@
 				endif
 			endif
 		endif
-		ClearKeyBoards()
+		if $KeyBoardActive=1 then 	ClearKeyBoards()
 	EndFunc
 	Func GetBotUpdates()
 		$offset=Get_BotOffSet()
@@ -531,43 +531,23 @@
 		Return 0
 	EndFunc
 	Func SQLUpdateUserAlerts($UserID,$mensage,$active=1)
+		$mensage=StringReplace($mensage,"callback_query ","")
 		$msgArr=StringSplit($mensage,"_")
+		_printfromarray($msgArr)
 		if $msgArr[2]="ON" then
-
-		endif
-;~ 		$query='UPDATE  Users SET Active=' & $active &' WHERE UserID='& $UserID & ' ;'
-;~ 		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
-;~ 			return true
-;~ 		Else
-;~ 			ConsoleWrite("       Error updating active user User ErrNo 1012" & @CRLF & $query& @crlf)
-;~ 			Return false
-;~ 		EndIf
-	EndFunc
-#endregion
-#region   ===================================   keyboard   ==========================
-	Func SQLregisterKeyboard($UserID,$MsgID,$epoch)
-		$query='INSERT INTO Keyboard VALUES (' & $UserID & ',' & $MsgID  & ',' & $epoch & ') ;'
-		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then return true
-		Return false
-	EndFunc
-	Func SQLUnRegisterKeyboard($UserID,$MsgID)
-		$query='DELETE FROM Keyboard WHERE UserID=' & $UserID & ' AND MsgID=' & $MsgID & ' ;'
-		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then return true
-		Return false
-	EndFunc
-	Func ClearKeyBoards()
-		$query='SELECT UserID,MsgID FROM Keyboard WHERE Timestamp < ' & _GetUnixTime()-60 & ';'
-		_SQLITEqry($query,$dbfullPath)
-		If  IsArray($qryResult) Then
-;~ 			_printFromArray($qryResult)
-			if UBound($qryResult)>1 then
-				for $i=1 to UBound($qryResult)-1
-					_DeleteMsg( $qryResult[$i][0],$qryResult[$i][1])
-					SQLUnRegisterKeyboard($qryResult[$i][0],$qryResult[$i][1])
-				next
+			$query='INSERT OR REPLACE INTO AlertasLineas (id, userid,' & $msgArr[1]
+			$query&=') VALUES ((SELECT id from AlertasLineas WHERE userid=' & $UserID & '),' & $UserID & ',1);'
+			if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+				return true
+			Else
+				ConsoleWrite("       Error updating alertasLineas User ErrNo 1013" & @CRLF & $query& @crlf)
+				Return false
 			EndIf
 		endif
 	EndFunc
+#endregion
+#region   ===================================   keyboard   ==========================
+	;============== show keyboard =========================
 	func KeyboardActivate($UserID)
 		$keybrd =  '{"inline_keyboard":['
 		$keybrd &= '['
@@ -589,9 +569,7 @@
 		$MSGID=StringRegExp($res,'"message_id":(.*?),"from":',1)
 		$UsrID=StringRegExp($res,',"chat":{"id":(.*?),"first_name":',1)
 		$utime=StringRegExp($res,',"date":(.*?),"text":',1)
-		if IsArray($MSGID) then
-			SQLregisterKeyboard($UsrID[0],$MsgID[0],$utime[0])
-		endif
+		if IsArray($MSGID) then	SQLregisterKeyboard($UsrID[0],$MsgID[0],$utime[0])
 		if $res then return True
 		return false
 	EndFunc
@@ -615,11 +593,38 @@
 		$res=_SendMsg($UserID,"Sus alertas activas son:"& "" & $nuevaLinea & "Cual desea desactivar?","HTML",$keybrd)
 		$MSGID=StringRegExp($res,'"message_id":(.*?),"from":',1)
 		$UsrID=StringRegExp($res,',"chat":{"id":(.*?),"first_name":',1)
-		if IsArray($MSGID) then
-			SQLunregisterKeyboard($UsrID[0],$MsgID[0])
-		endif
+		if IsArray($MSGID) then	SQLregisterKeyboard($UsrID[0],$MsgID[0])
 		if $res then return True
 		return false
+	EndFunc
+	Func SQLregisterKeyboard($UserID,$MsgID,$epoch)
+		$query='INSERT INTO Keyboard VALUES (' & $UserID & ',' & $MsgID  & ',' & $epoch & ') ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+			$KeyBoardActive=1
+			return true
+		endif
+		Return false
+	EndFunc
+	;==================   limpiar keyboard  =====================
+	Func ClearKeyBoards()
+		ConsoleWrite('**(' & @ScriptLineNumber & ') : ClearKeyBoards() = ' &@crlf )
+		$query='SELECT UserID,MsgID FROM Keyboard WHERE Timestamp < ' & _GetUnixTime()-60 & ';'
+		_SQLITEqry($query,$dbfullPath)
+		If  IsArray($qryResult) Then
+;~ 			_printFromArray($qryResult)
+			if UBound($qryResult)>1 then
+				for $i=1 to UBound($qryResult)-1
+					_DeleteMsg( $qryResult[$i][0],$qryResult[$i][1])
+					SQLUnRegisterKeyboard($qryResult[$i][0],$qryResult[$i][1])
+					$KeyBoardActive=0
+				next
+			EndIf
+		endif
+	EndFunc
+	Func SQLUnRegisterKeyboard($UserID,$MsgID)
+		$query='DELETE FROM Keyboard WHERE UserID=' & $UserID & ' AND MsgID=' & $MsgID & ' ;'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then return true
+		Return false
 	EndFunc
 #endregion
 #region   ===========================================================================
