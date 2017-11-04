@@ -451,6 +451,9 @@
 ;~ 		eliminate contact info
 		$s=StringRegExpReplace($s,'(?s)(?i)"contact":(.*?)}'  ,  '"text": ""' )
 
+;~ 		eliminate photo info
+		$s=StringRegExpReplace($s,'(?s)(?i)"photo":\[(.*?)\]'  ,  '"text": ""' )
+
 ;~ 		replace username last-name
 		$s=StringReplace($s,'"username":','"last_name":')
 
