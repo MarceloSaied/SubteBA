@@ -415,6 +415,20 @@
 ;~ 		eliminate "edited_message":{"
 		$s=StringReplace($s,'"edited_message":{','"message":{')
 
+;     check lastname
+		$LNarr=StringRegExp($s,'"first_name":"(.*?)","language_code":"',1)
+		if IsArray($LNarr) then
+			for $r=0 to UBound($LNarr)-1
+				$donde='"first_name":"[a-zA-Z]*","language_code":"'
+				$pat='"first_name":"' & $LNarr[$r] & '","last_name":"xxx","language_code":"'
+				$s=StringRegExpReplace($s,$donde,$pat)
+
+				$donde='"first_name":"[a-zA-Z]*","type":"'
+				$pat='"first_name":"' & $LNarr[$r] & '","last_name":"xxx","type":"'
+				$s=StringRegExpReplace($s,$donde,$pat)
+			next
+		endif
+
 ;~ 		eliminate "callback_query":{"
 		if StringInStr($s,'"callback_query":')> 0 then
 			$s=StringRegExpReplace($s,'(?s)(?i)"callback_query":(.*?)"from":(.*?)},',"")
@@ -529,13 +543,11 @@
 #endregion
 #region   ===================================   keyboard   ==========================
 	Func SQLregisterKeyboard($UserID,$MsgID,$epoch)
-		ConsoleWrite('++(' & @ScriptLineNumber & ') : insert = ' & $epoch & @crlf )
 		$query='INSERT INTO Keyboard VALUES (' & $UserID & ',' & $MsgID  & ',' & $epoch & ') ;'
 		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then return true
 		Return false
 	EndFunc
 	Func SQLUnRegisterKeyboard($UserID,$MsgID)
-		ConsoleWrite('!!(' & @ScriptLineNumber & ') : delete = '  & @crlf )
 		$query='DELETE FROM Keyboard WHERE UserID=' & $UserID & ' AND MsgID=' & $MsgID & ' ;'
 		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then return true
 		Return false
@@ -544,7 +556,7 @@
 		$query='SELECT UserID,MsgID FROM Keyboard WHERE Timestamp < ' & _GetUnixTime()-60 & ';'
 		_SQLITEqry($query,$dbfullPath)
 		If  IsArray($qryResult) Then
-			_printFromArray($qryResult)
+;~ 			_printFromArray($qryResult)
 			if UBound($qryResult)>1 then
 				for $i=1 to UBound($qryResult)-1
 					_DeleteMsg( $qryResult[$i][0],$qryResult[$i][1])
