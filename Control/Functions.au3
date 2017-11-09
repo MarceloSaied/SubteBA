@@ -71,11 +71,11 @@
 		$message&='Commandos:'  & $nuevaLinea
 		$message&='/START -> Activa alertas. '  & $nuevaLinea
 		$message&='/STOP  -> Desactiva alertas. '  & $nuevaLinea
+		$message&='/ACTIVAR -> Alertas de lineas.'  & $nuevaLinea
+		$message&='/DESACTIVAR -> Alertas de lineas.'  & $nuevaLinea
 		$message&='/INFO   -> Este mensaje'  & $nuevaLinea
 		$message&= $nuevaLinea
 		$message&='Futuros Comandos:'  & $nuevaLinea
-		$message&='/ACTIVAR -> Alertas de lineas elegidas.'  & $nuevaLinea
-		$message&='/DESACTIVAR -> Alertas de lineas elegidas.'  & $nuevaLinea
 		$message&='/CERCANA -> Estacion mas cercana.'  & $nuevaLinea
 		$message&='/ESTACIONES -> lista de estaciones por linea.'  & $nuevaLinea
 		$message&='/HORARIOS -> Horarios de actividad'  & $nuevaLinea
