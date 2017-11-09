@@ -618,15 +618,12 @@
 	EndFunc
 	;==================   limpiar keyboard  =====================
 	Func ClearKeyBoards()
-;~ 		ConsoleWrite('**(' & @ScriptLineNumber & ') : ClearKeyBoards()  $KeyBoardActive= ' & $KeyBoardActive &@crlf )
 		$query='SELECT UserID,MsgID FROM Keyboard WHERE Timestamp < ' & _GetUnixTime()-60 & ';'
 		_SQLITEqry($query,$dbfullPath)
-;~ 		$ahora=0.2
+		_printfromarray($qryResult)
 		If  IsArray($qryResult) Then
 			if UBound($qryResult)>1 then
 				for $i=1 to UBound($qryResult)-1
-					_printFromArray($qryResult)
-;~ 					ConsoleWrite('**@@(' & @ScriptLineNumber & ') : $i = ' & $i & @crlf )
 					_DeleteMsg( $qryResult[$i][0],$qryResult[$i][1])
 					SQLUnRegisterKeyboard($qryResult[$i][0],$qryResult[$i][1])
 					$ahora=1

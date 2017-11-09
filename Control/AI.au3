@@ -8,7 +8,6 @@ Func AImessage($msg,$word)
 	endif
 EndFunc
 Func ParseBotMessage($UserID,$Fname,$Lname,$epoch,$mensage,$TweetID,$MsgID)
-;~ 	ConsoleWrite('++ParseBotMessage() = '& @crlf)
 	if AIMessage($mensage,"/START") then return true
 	if AIMessage($mensage,"/STOP") then return true
 	if AIMessage($mensage,"info") or AIMessage($mensage,"informacion")  or AIMessage($mensage,"/INFO") or AIMessage($mensage,"help") then
@@ -21,7 +20,7 @@ Func ParseBotMessage($UserID,$Fname,$Lname,$epoch,$mensage,$TweetID,$MsgID)
 		$ret=KeyboardActivate($UserID)
 		$ahora=0
 		if $ret then
-			SQLregisterKeyboard($UserID,$MsgID,$epoch)
+;~ 			SQLregisterKeyboard($UserID,$MsgID,$epoch)
 			return true
 		endif
 		return false
@@ -31,7 +30,7 @@ Func ParseBotMessage($UserID,$Fname,$Lname,$epoch,$mensage,$TweetID,$MsgID)
 		$ret=KeyboardDesActivate($UserID)
 		$ahora=0
 		if $ret then
-			SQLregisterKeyboard($UserID,$MsgID,$epoch)
+;~ 			SQLregisterKeyboard($UserID,$MsgID,$epoch)
 			return true
 		endif
 		return false
