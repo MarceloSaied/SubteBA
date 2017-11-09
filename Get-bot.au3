@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=Telegram Bot Handeler
 #AutoIt3Wrapper_Res_Description=Telegram Bot Handeler
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.65
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.69
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_LegalCopyright=By Marcelo Saied
 #AutoIt3Wrapper_Run_Obfuscator=y
@@ -18,7 +18,7 @@
 		MsgBox(0, "Warning", "An occurence of " & @ScriptName & " is already running")
 		Exit
 	EndIf
-
+	$version="0.2"
 	$SendToAll=0 ; si es 0 solo se manda a Dev users
 					  ; si es 1 se manda a todos
 	if @Compiled then $SendToAll=1

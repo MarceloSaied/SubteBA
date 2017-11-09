@@ -387,7 +387,7 @@
 		Else
 			$KeyboardCheckcount = $KeyboardCheckcount +1
 		endif
-		ConsoleWrite('**(' & @ScriptLineNumber & ') : $KeyBoardActive= ' & $KeyBoardActive &@crlf )
+;~ 		ConsoleWrite('**(' & @ScriptLineNumber & ') : $KeyBoardActive= ' & $KeyBoardActive &@crlf )
 	EndFunc
 	Func GetBotUpdates()
 		$offset=Get_BotOffSet()
@@ -618,7 +618,7 @@
 	EndFunc
 	;==================   limpiar keyboard  =====================
 	Func ClearKeyBoards()
-		ConsoleWrite('**(' & @ScriptLineNumber & ') : ClearKeyBoards()  $KeyBoardActive= ' & $KeyBoardActive &@crlf )
+;~ 		ConsoleWrite('**(' & @ScriptLineNumber & ') : ClearKeyBoards()  $KeyBoardActive= ' & $KeyBoardActive &@crlf )
 		$query='SELECT UserID,MsgID FROM Keyboard WHERE Timestamp < ' & _GetUnixTime()-60 & ';'
 		_SQLITEqry($query,$dbfullPath)
 ;~ 		$ahora=0.2
@@ -626,7 +626,7 @@
 			if UBound($qryResult)>1 then
 				for $i=1 to UBound($qryResult)-1
 					_printFromArray($qryResult)
-					ConsoleWrite('**@@(' & @ScriptLineNumber & ') : $i = ' & $i & @crlf )
+;~ 					ConsoleWrite('**@@(' & @ScriptLineNumber & ') : $i = ' & $i & @crlf )
 					_DeleteMsg( $qryResult[$i][0],$qryResult[$i][1])
 					SQLUnRegisterKeyboard($qryResult[$i][0],$qryResult[$i][1])
 					$ahora=1
