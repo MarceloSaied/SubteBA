@@ -8,7 +8,7 @@
 		$SQLq = "SELECT name FROM sqlite_temp_master WHERE type='table';"
 		_SQLITErun($SQLq, $dbfullPath, $quietSQLQuery)
 	;~ 	;-------- Init Log
-	;~ 	_initLog()
+	 	_initLog()
 		;------------------------------------------------------------------------------
 	EndFunc   ;==>_ConfigDBInitial
 #endregion
@@ -699,6 +699,60 @@
 			  Return 0
 		 EndIf
 	EndFunc  ; ==>_timeBetween
+#endregion
+#region log
+	Func _initLog()
+		ConsoleWrite('++_initLog() = '& @crlf)
+		FileClose($hLogFile)
+		;open log file for activity
+		$hLogFile = FileOpen($LogFileActivity, 1+8)
+		If $hLogFile = -1 Then
+			ConsoleWrite("Error Unable to open file Log File.")
+			MsgBox(48+4096, "Activity Log File error", "Activity Log File cannot be reached." & @crlf & _
+								"File configured: " & $LogFileActivity & @crlf & _
+								"Using Log file: " & $LogFileActivity& @crlf &"ErrNo 2052",0)
+		EndIf
+
+		ConsoleWrite('- ActivityLogFile = ' & $LogFileActivity & @crlf )
+		FileWriteLine($hLogFile,"===============================================================================" )
+		FileWriteLine($hLogFile,"===============================================================================")
+		FileWriteLine($hLogFile,_NowCalcDate()  & @TAB& "Start of activities"& @TAB& "Version: "& $version)
+		FileWriteLine($hLogFile,"===============================================================================")
+	EndFunc
+	Func _ConsoleWrite($s_text,$logLevel=0)
+		Switch $logLevel
+			Case 0
+				$logLevelmsg="DEBUG"
+				$levelcolor="+"
+			Case 1
+				$levelcolor=">"
+				$logLevelmsg="INFO"
+			Case 2
+				$levelcolor="-"
+				$logLevelmsg="WARN"
+			Case 3
+				$levelcolor="!"
+				$logLevelmsg="ERROR"
+			Case Else
+				$logLevelmsg="NA"
+		EndSwitch
+		FileWriteLine($hLogFile, _LogDate()&" ["& $logLevelmsg&"] " & $s_text )
+;~ 			ConsoleWrite($levelcolor&"["& $logLevelmsg&"] " & $s_text & @CRLF)
+		ConsoleWrite($s_text & @CRLF)
+	EndFunc   ;==>_ConsoleWrite
+	Func _LogDate()
+		$tCur = _Date_Time_GetLocalTime()
+		$tCur = _Date_Time_SystemTimeToDateTimeStr($tCur)
+		$date = "[" & stringreplace($tCur,"/","-") & "] "
+		return $date
+	EndFunc
+	Func _EndLog()
+		ConsoleWrite('++_EndLog() = '& @crlf)
+		FileWriteLine($hLogFile,"..............................................................................." )
+		FileWriteLine($hLogFile,_NowCalcDate()   & @TAB& "End of activities")
+		FileWriteLine($hLogFile,"..............................................................................." & @CRLF)
+		FileClose($hLogFile)
+	EndFunc
 #endregion
 #region time
 	Func  Sec2Time($nr_sec)
