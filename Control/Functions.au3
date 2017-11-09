@@ -134,14 +134,12 @@
 		return $respuesta
 	EndFunc
 	Func TelegramActivateMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
-		$message ="La Funcion de Activacion de alertas por linea, "
-		$message&='No esta implementado en este momento.'  & $nuevaLinea
-		$message&='/INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
-;~ 		$message&=$USRmsg& $nuevaLinea
-;~ 		$message&="Su mensage:" & $nuevaLinea & $USRmsg
+		$alertasactivas=SQLGetAlertLines($UserID)
+		$message="Sus alertas activas son:" & $nuevaLinea & $alertasactivas & $nuevaLinea
+		$message&='/ACTIVAR -> Alertas de lineas.'  & $nuevaLinea
+		$message&='/DESACTIVAR -> Alertas de lineas.'  & $nuevaLinea
 		$respuesta = SendTelegramexec($UserID,$message)
-		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
-		return $respuesta
+		return true
 	EndFunc
 	Func ReformatMessage($message)
 ;~ 	ConsoleWrite('++ReformatMessage() = '& @crlf)
@@ -574,7 +572,8 @@
 		$keybrd &= '],['
 		$keybrd &= ']'
 		$keybrd &= ']}'
-		$res=_SendMsg($UserID,"Sus alertas activas son:"& "" & $nuevaLinea & "Cual desea activar?","HTML",$keybrd)
+		$alertasactivas=SQLGetAlertLines($UserID)
+		$res=_SendMsg($UserID,"Sus alertas activas:"& $alertasactivas & $nuevaLinea & "Cual desea activar?","HTML",$keybrd)
 		$MSGID=StringRegExp($res,'"message_id":(.*?),"from":',1)
 		$UsrID=StringRegExp($res,',"chat":{"id":(.*?),"first_name":',1)
 		$utime=StringRegExp($res,',"date":(.*?),"text":',1)
@@ -599,13 +598,30 @@
 		$keybrd &= '],['
 		$keybrd &= ']'
 		$keybrd &= ']}'
-		$res=_SendMsg($UserID,"Sus alertas activas son:"& "" & $nuevaLinea & "Cual desea desactivar?","HTML",$keybrd)
+		$alertasactivas=SQLGetAlertLines($UserID)
+		$res=_SendMsg($UserID,"Sus alertas activas:"& $alertasactivas & $nuevaLinea & "Cual desea desactivar?","HTML",$keybrd)
 		$MSGID=StringRegExp($res,'"message_id":(.*?),"from":',1)
 		$UsrID=StringRegExp($res,',"chat":{"id":(.*?),"first_name":',1)
 		$utime=StringRegExp($res,',"date":(.*?),"text":',1)
 		if IsArray($MSGID) then	SQLregisterKeyboard($UsrID[0],$MsgID[0],$utime[0])
 		if $res then return True
 		return false
+	EndFunc
+	Func SQLGetAlertLines($UserID)
+		$query='select * from AlertasLineas WHERE UserID=' & $UserID & ' ;'
+		_SQLITEqry($query,$dbfullPath)
+		_printfromarray($qryResult)
+		If  IsArray($qryResult) Then
+			if UBound($qryResult)>1 then
+				$lineasactivas=" "
+				for $i=1 to UBound($qryResult,2)-1
+					if $qryResult[1][$i]=1 then
+						$lineasactivas &=$qryResult[0][$i] & " "
+					endif
+				next
+				return $lineasactivas
+			EndIf
+		endif
 	EndFunc
 	Func SQLregisterKeyboard($UserID,$MsgID,$epoch)
 		$query='INSERT INTO Keyboard VALUES (' & $UserID & ',' & $MsgID  & ',' & $epoch & ') ;'
