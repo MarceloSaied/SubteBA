@@ -20,7 +20,10 @@ Func ParseBotMessage($UserID,$Fname,$Lname,$epoch,$mensage,$TweetID,$MsgID)
 	if AIMessage($mensage,"/ACTIVAR") then
 		$ret=KeyboardActivate($UserID)
 		$ahora=0
-		if $ret then return true
+		if $ret then
+			SQLregisterKeyboard($UserID,$MsgID,$epoch)
+			return true
+		endif
 		return false
 	endif
 

@@ -539,20 +539,20 @@
 		endif
 		Return 0
 	EndFunc
-	Func SQLUpdateUserAlerts($UserID,$mensage,$active=1)
+	Func SQLUpdateUserAlerts($UserID,$mensage)
 		$mensage=StringReplace($mensage,"callback_query ","")
 		$msgArr=StringSplit($mensage,"_")
 		_printfromarray($msgArr)
-		if $msgArr[2]="ON" then
-			$query='UPDATE AlertasLineas SET ' & $msgArr[1] & '=1 WHERE userid=' & $UserID & ';   '
-			$query&='INSERT INTO AlertasLineas (userid,' & $msgArr[1] & ')  SELECT ' & $UserID & ',1 WHERE (Select Changes() = 0);'
-			if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
-				return true
-			Else
-				ConsoleWrite("!    Error updating alertasLineas User ErrNo 1013" & @CRLF & $query& @crlf)
-				Return false
-			EndIf
-		endif
+		$active=0
+		if $msgArr[2]="ON" then $active=1
+		$query='UPDATE AlertasLineas SET ' & $msgArr[1] & '=' & $active & ' WHERE userid=' & $UserID & ';   '
+		$query&='INSERT INTO AlertasLineas (userid,' & $msgArr[1] & ')  SELECT ' & $UserID & ',' & $active &' WHERE (Select Changes() = 0);'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+			return true
+		Else
+			ConsoleWrite("!    Error updating alertasLineas User ErrNo 1013" & @CRLF & $query& @crlf)
+			Return false
+		EndIf
 	EndFunc
 #endregion
 #region   ===================================   keyboard   ==========================
