@@ -8,7 +8,7 @@
 		$SQLq = "SELECT name FROM sqlite_temp_master WHERE type='table';"
 		_SQLITErun($SQLq, $dbfullPath, $quietSQLQuery)
 	;~ 	;-------- Init Log
-	;~ 	_initLog()
+	 	_initLog()
 		;------------------------------------------------------------------------------
 	EndFunc   ;==>_ConfigDBInitial
 #endregion
@@ -71,11 +71,11 @@
 		$message&='Commandos:'  & $nuevaLinea
 		$message&='/START -> Activa alertas. '  & $nuevaLinea
 		$message&='/STOP  -> Desactiva alertas. '  & $nuevaLinea
+		$message&='/ACTIVAR -> Alertas de lineas.'  & $nuevaLinea
+		$message&='/DESACTIVAR -> Alertas de lineas.'  & $nuevaLinea
 		$message&='/INFO   -> Este mensaje'  & $nuevaLinea
 		$message&= $nuevaLinea
 		$message&='Futuros Comandos:'  & $nuevaLinea
-		$message&='/ACTIVAR -> Alertas de lineas elegidas.'  & $nuevaLinea
-		$message&='/DESACTIVAR -> Alertas de lineas elegidas.'  & $nuevaLinea
 		$message&='/CERCANA -> Estacion mas cercana.'  & $nuevaLinea
 		$message&='/ESTACIONES -> lista de estaciones por linea.'  & $nuevaLinea
 		$message&='/HORARIOS -> Horarios de actividad'  & $nuevaLinea
@@ -134,14 +134,12 @@
 		return $respuesta
 	EndFunc
 	Func TelegramActivateMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
-		$message ="La Funcion de Activacion de alertas por linea, "
-		$message&='No esta implementado en este momento.'  & $nuevaLinea
-		$message&='/INFO -> para mas informacion.'& $nuevaLinea & $nuevaLinea
-;~ 		$message&=$USRmsg& $nuevaLinea
-;~ 		$message&="Su mensage:" & $nuevaLinea & $USRmsg
+		$alertasactivas=SQLGetAlertLines($UserID)
+		$message="Sus alertas activas son:" & $nuevaLinea & $alertasactivas & $nuevaLinea
+		$message&='/ACTIVAR -> Alertas de lineas.'  & $nuevaLinea
+		$message&='/DESACTIVAR -> Alertas de lineas.'  & $nuevaLinea
 		$respuesta = SendTelegramexec($UserID,$message)
-		SQLInsertUserMessage($TweetID,$USRmsg,$UserID,$Fname,$Lname,$epoch)
-		return $respuesta
+		return true
 	EndFunc
 	Func ReformatMessage($message)
 ;~ 	ConsoleWrite('++ReformatMessage() = '& @crlf)
@@ -387,7 +385,7 @@
 		Else
 			$KeyboardCheckcount = $KeyboardCheckcount +1
 		endif
-		ConsoleWrite('**(' & @ScriptLineNumber & ') : $KeyBoardActive= ' & $KeyBoardActive &@crlf )
+;~ 		ConsoleWrite('**(' & @ScriptLineNumber & ') : $KeyBoardActive= ' & $KeyBoardActive &@crlf )
 	EndFunc
 	Func GetBotUpdates()
 		$offset=Get_BotOffSet()
@@ -539,20 +537,20 @@
 		endif
 		Return 0
 	EndFunc
-	Func SQLUpdateUserAlerts($UserID,$mensage,$active=1)
+	Func SQLUpdateUserAlerts($UserID,$mensage)
 		$mensage=StringReplace($mensage,"callback_query ","")
 		$msgArr=StringSplit($mensage,"_")
 		_printfromarray($msgArr)
-		if $msgArr[2]="ON" then
-			$query='UPDATE AlertasLineas SET ' & $msgArr[1] & '=1 WHERE userid=' & $UserID & ';   '
-			$query&='INSERT INTO AlertasLineas (userid,' & $msgArr[1] & ')  SELECT ' & $UserID & ',1 WHERE (Select Changes() = 0);'
-			if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
-				return true
-			Else
-				ConsoleWrite("!    Error updating alertasLineas User ErrNo 1013" & @CRLF & $query& @crlf)
-				Return false
-			EndIf
-		endif
+		$active=0
+		if $msgArr[2]="ON" then $active=1
+		$query='UPDATE AlertasLineas SET ' & $msgArr[1] & '=' & $active & ' WHERE userid=' & $UserID & ';   '
+		$query&='INSERT INTO AlertasLineas (userid,' & $msgArr[1] & ')  SELECT ' & $UserID & ',' & $active &' WHERE (Select Changes() = 0);'
+		if _SQLITErun($query,$dbfullPath,$quietSQLQuery) Then
+			return true
+		Else
+			ConsoleWrite("!    Error updating alertasLineas User ErrNo 1013" & @CRLF & $query& @crlf)
+			Return false
+		EndIf
 	EndFunc
 #endregion
 #region   ===================================   keyboard   ==========================
@@ -574,7 +572,8 @@
 		$keybrd &= '],['
 		$keybrd &= ']'
 		$keybrd &= ']}'
-		$res=_SendMsg($UserID,"Sus alertas activas son:"& "" & $nuevaLinea & "Cual desea activar?","HTML",$keybrd)
+		$alertasactivas=SQLGetAlertLines($UserID)
+		$res=_SendMsg($UserID,"Sus alertas activas:"& $alertasactivas & $nuevaLinea & "Cual desea activar?","HTML",$keybrd)
 		$MSGID=StringRegExp($res,'"message_id":(.*?),"from":',1)
 		$UsrID=StringRegExp($res,',"chat":{"id":(.*?),"first_name":',1)
 		$utime=StringRegExp($res,',"date":(.*?),"text":',1)
@@ -599,13 +598,30 @@
 		$keybrd &= '],['
 		$keybrd &= ']'
 		$keybrd &= ']}'
-		$res=_SendMsg($UserID,"Sus alertas activas son:"& "" & $nuevaLinea & "Cual desea desactivar?","HTML",$keybrd)
+		$alertasactivas=SQLGetAlertLines($UserID)
+		$res=_SendMsg($UserID,"Sus alertas activas:"& $alertasactivas & $nuevaLinea & "Cual desea desactivar?","HTML",$keybrd)
 		$MSGID=StringRegExp($res,'"message_id":(.*?),"from":',1)
 		$UsrID=StringRegExp($res,',"chat":{"id":(.*?),"first_name":',1)
 		$utime=StringRegExp($res,',"date":(.*?),"text":',1)
 		if IsArray($MSGID) then	SQLregisterKeyboard($UsrID[0],$MsgID[0],$utime[0])
 		if $res then return True
 		return false
+	EndFunc
+	Func SQLGetAlertLines($UserID)
+		$query='select * from AlertasLineas WHERE UserID=' & $UserID & ' ;'
+		_SQLITEqry($query,$dbfullPath)
+		_printfromarray($qryResult)
+		If  IsArray($qryResult) Then
+			if UBound($qryResult)>1 then
+				$lineasactivas=" "
+				for $i=1 to UBound($qryResult,2)-1
+					if $qryResult[1][$i]=1 then
+						$lineasactivas &=$qryResult[0][$i] & " "
+					endif
+				next
+				return $lineasactivas
+			EndIf
+		endif
 	EndFunc
 	Func SQLregisterKeyboard($UserID,$MsgID,$epoch)
 		$query='INSERT INTO Keyboard VALUES (' & $UserID & ',' & $MsgID  & ',' & $epoch & ') ;'
@@ -618,15 +634,12 @@
 	EndFunc
 	;==================   limpiar keyboard  =====================
 	Func ClearKeyBoards()
-		ConsoleWrite('**(' & @ScriptLineNumber & ') : ClearKeyBoards()  $KeyBoardActive= ' & $KeyBoardActive &@crlf )
 		$query='SELECT UserID,MsgID FROM Keyboard WHERE Timestamp < ' & _GetUnixTime()-60 & ';'
 		_SQLITEqry($query,$dbfullPath)
-;~ 		$ahora=0.2
+		_printfromarray($qryResult)
 		If  IsArray($qryResult) Then
 			if UBound($qryResult)>1 then
 				for $i=1 to UBound($qryResult)-1
-					_printFromArray($qryResult)
-					ConsoleWrite('**@@(' & @ScriptLineNumber & ') : $i = ' & $i & @crlf )
 					_DeleteMsg( $qryResult[$i][0],$qryResult[$i][1])
 					SQLUnRegisterKeyboard($qryResult[$i][0],$qryResult[$i][1])
 					$ahora=1
@@ -699,6 +712,60 @@
 			  Return 0
 		 EndIf
 	EndFunc  ; ==>_timeBetween
+#endregion
+#region log
+	Func _initLog()
+		ConsoleWrite('++_initLog() = '& @crlf)
+		FileClose($hLogFile)
+		;open log file for activity
+		$hLogFile = FileOpen($LogFileActivity, 1+8)
+		If $hLogFile = -1 Then
+			ConsoleWrite("Error Unable to open file Log File.")
+			MsgBox(48+4096, "Activity Log File error", "Activity Log File cannot be reached." & @crlf & _
+								"File configured: " & $LogFileActivity & @crlf & _
+								"Using Log file: " & $LogFileActivity& @crlf &"ErrNo 2052",0)
+		EndIf
+
+		ConsoleWrite('- ActivityLogFile = ' & $LogFileActivity & @crlf )
+		FileWriteLine($hLogFile,"===============================================================================" )
+		FileWriteLine($hLogFile,"===============================================================================")
+		FileWriteLine($hLogFile,_NowCalcDate()  & @TAB& "Start of activities"& @TAB& "Version: "& $version)
+		FileWriteLine($hLogFile,"===============================================================================")
+	EndFunc
+	Func _ConsoleWrite($s_text,$logLevel=0)
+		Switch $logLevel
+			Case 0
+				$logLevelmsg="DEBUG"
+				$levelcolor="+"
+			Case 1
+				$levelcolor=">"
+				$logLevelmsg="INFO"
+			Case 2
+				$levelcolor="-"
+				$logLevelmsg="WARN"
+			Case 3
+				$levelcolor="!"
+				$logLevelmsg="ERROR"
+			Case Else
+				$logLevelmsg="NA"
+		EndSwitch
+		FileWriteLine($hLogFile, _LogDate()&" ["& $logLevelmsg&"] " & $s_text )
+;~ 			ConsoleWrite($levelcolor&"["& $logLevelmsg&"] " & $s_text & @CRLF)
+		ConsoleWrite($s_text & @CRLF)
+	EndFunc   ;==>_ConsoleWrite
+	Func _LogDate()
+		$tCur = _Date_Time_GetLocalTime()
+		$tCur = _Date_Time_SystemTimeToDateTimeStr($tCur)
+		$date = "[" & stringreplace($tCur,"/","-") & "] "
+		return $date
+	EndFunc
+	Func _EndLog()
+		ConsoleWrite('++_EndLog() = '& @crlf)
+		FileWriteLine($hLogFile,"..............................................................................." )
+		FileWriteLine($hLogFile,_NowCalcDate()   & @TAB& "End of activities")
+		FileWriteLine($hLogFile,"..............................................................................." & @CRLF)
+		FileClose($hLogFile)
+	EndFunc
 #endregion
 #region time
 	Func  Sec2Time($nr_sec)

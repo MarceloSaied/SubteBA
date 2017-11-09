@@ -11,6 +11,8 @@
 	endif
 	ConsoleWrite('<<   Config: '&$configPath & @crlf )
 	global $OffsetFile=$FolderResources&"\OffSet.txt"
+	global $LogFileActivity="SubteBA.log"
+	global $hLogFile=0
 #endregion working files
 #region sqlite
 	func _DBvarInit()
